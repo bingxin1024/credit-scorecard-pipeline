@@ -1,0 +1,786 @@
+{
+  "config_hash": "f0649da10817",
+  "n_rows": 30000,
+  "bad_rate": 0.2212,
+  "split": [
+    {
+      "segment": "train",
+      "n": 17850,
+      "share": 0.595,
+      "bad_rate": 0.22123249299719888
+    },
+    {
+      "segment": "test",
+      "n": 7650,
+      "share": 0.255,
+      "bad_rate": 0.2211764705882353
+    },
+    {
+      "segment": "oot",
+      "n": 4500,
+      "share": 0.15,
+      "bad_rate": 0.22111111111111112
+    }
+  ],
+  "variants": {
+    "no_platform_rating": {
+      "n_candidate_features": 32,
+      "n_selected": 17,
+      "selected": [
+        "PAY_0",
+        "MAX_DELQ_6M",
+        "PAY_2",
+        "PAY_3",
+        "PAY_4",
+        "PAY_5",
+        "PAY_RATIO_MEAN_5M",
+        "LIMIT_BAL",
+        "PAY_AMT1",
+        "PAY_AMT2",
+        "PAY_AMT3",
+        "PAY_AMT4",
+        "PAY_AMT6",
+        "PAY_AMT5",
+        "UTIL_MEAN_6M",
+        "BILL_TREND_3M",
+        "EDUCATION"
+      ],
+      "metrics": [
+        {
+          "model": "LR scorecard",
+          "segment": "train",
+          "n": 17850,
+          "bad_rate": 0.22123249299719888,
+          "auc": 0.775450751487625,
+          "ks": 0.41759270494503065,
+          "gini": 0.55090150297525
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "train",
+          "n": 17850,
+          "bad_rate": 0.22123249299719888,
+          "auc": 0.8061053556942812,
+          "ks": 0.4582169878380107,
+          "gini": 0.6122107113885624
+        },
+        {
+          "model": "LR scorecard",
+          "segment": "test",
+          "n": 7650,
+          "bad_rate": 0.2211764705882353,
+          "auc": 0.7666734517509088,
+          "ks": 0.421234099690743,
+          "gini": 0.5333469035018177
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "test",
+          "n": 7650,
+          "bad_rate": 0.2211764705882353,
+          "auc": 0.7825267415644738,
+          "ks": 0.42932441987529735,
+          "gini": 0.5650534831289475
+        },
+        {
+          "model": "LR scorecard",
+          "segment": "oot",
+          "n": 4500,
+          "bad_rate": 0.22111111111111112,
+          "auc": 0.7640563731639654,
+          "ks": 0.40195700327600914,
+          "gini": 0.5281127463279307
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "oot",
+          "n": 4500,
+          "bad_rate": 0.22111111111111112,
+          "auc": 0.7877196252302884,
+          "ks": 0.43669416985067994,
+          "gini": 0.5754392504605768
+        }
+      ],
+      "cv": {
+        "lr": {
+          "cv_auc_mean": 0.7717591304005383,
+          "cv_auc_std": 0.007026978743012187,
+          "cv_ks_mean": 0.42288391524371144,
+          "cv_ks_std": 0.009467246758795239,
+          "cv_auc_folds": [
+            0.7825651124669885,
+            0.7684596120571897,
+            0.7725749021036336,
+            0.7717550769510974,
+            0.7634409484237827
+          ],
+          "cv_ks_folds": [
+            0.4316410163008833,
+            0.4164784627993807,
+            0.43471906019488205,
+            0.4155723522447865,
+            0.4160086846786245
+          ]
+        },
+        "gbdt": {
+          "cv_auc_mean": 0.7882010082920071,
+          "cv_auc_std": 0.00883679429564196,
+          "cv_ks_mean": 0.44392604334007435,
+          "cv_ks_std": 0.017684004717159703,
+          "cv_auc_folds": [
+            0.8007981968855296,
+            0.7870838266095984,
+            0.7918572989709498,
+            0.7841325926600492,
+            0.7771331263339089
+          ],
+          "cv_ks_folds": [
+            0.4648347145068755,
+            0.44764593388580276,
+            0.45289591111920585,
+            0.43593024314725437,
+            0.41832341404123313
+          ]
+        }
+      },
+      "score_auc": {
+        "train": 0.775661845205749,
+        "test": 0.7669852283557796,
+        "oot": 0.764430282654356
+      },
+      "scaling": {
+        "pdo": 20.0,
+        "base_score": 600.0,
+        "base_odds": 20.0,
+        "factor": 28.85390081777927,
+        "offset": 513.5614381022527,
+        "intercept": -1.2573730587556806,
+        "base_points": 549.8415556305368,
+        "base_points_int": 550,
+        "min_score": 456,
+        "max_score": 610
+      }
+    }
+  },
+  "warnings": [
+    "PAY_0: IV = 0.849 > 0.5，疑似 leakage，已保留但需人工确认",
+    "DELQ_MONTHS_6M: IV = 0.843 > 0.5，疑似 leakage，已保留但需人工确认",
+    "MAX_DELQ_6M: IV = 0.743 > 0.5，疑似 leakage，已保留但需人工确认",
+    "PAY_2: IV = 0.535 > 0.5，疑似 leakage，已保留但需人工确认"
+  ],
+  "strategy": {
+    "has_net_cash": false,
+    "n_net_cash_missing": 0,
+    "net_cash_definition": null,
+    "baseline": {
+      "kind": "random",
+      "column": null
+    },
+    "approval_rates": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "target_approval_rate": 0.7,
+    "max_bad_rate": 0.1,
+    "profit_min_approval_rate": 0.1,
+    "segments": [
+      "test",
+      "oot"
+    ],
+    "variants": {
+      "no_platform_rating": {
+        "test": {
+          "n": 7650,
+          "bad_rate": 0.2211764705882353,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 569.0,
+              "approval_rate": 0.49686274509803924,
+              "n_approved": 3801.0,
+              "bad_rate_approved": 0.09734280452512496,
+              "bad_rate_rejected": 0.3434658352818914,
+              "marginal_n": 3801,
+              "marginal_bad_rate": 0.09734280452512496,
+              "bad_approved": 370.0,
+              "n_rejected": 3849.0
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 564.0,
+              "approval_rate": 0.6009150326797386,
+              "n_approved": 4597.0,
+              "bad_rate_approved": 0.10767892103545791,
+              "bad_rate_rejected": 0.3920733704552899,
+              "marginal_n": 796,
+              "marginal_bad_rate": 0.157035175879397,
+              "bad_approved": 495.0,
+              "n_rejected": 3053.0
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 554.0,
+              "approval_rate": 0.7044444444444444,
+              "n_approved": 5389.0,
+              "bad_rate_approved": 0.1202449434032288,
+              "bad_rate_rejected": 0.46174259177355154,
+              "marginal_n": 792,
+              "marginal_bad_rate": 0.19318181818181818,
+              "bad_approved": 648.0,
+              "n_rejected": 2261.0
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 535.0,
+              "approval_rate": 0.8019607843137255,
+              "n_approved": 6135.0,
+              "bad_rate_approved": 0.13528932355338225,
+              "bad_rate_rejected": 0.568976897689769,
+              "marginal_n": 746,
+              "marginal_bad_rate": 0.24396782841823056,
+              "bad_approved": 830.0,
+              "n_rejected": 1515.0
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 511.0,
+              "approval_rate": 0.9003921568627451,
+              "n_approved": 6888.0,
+              "bad_rate_approved": 0.1673925667828107,
+              "bad_rate_rejected": 0.7073490813648294,
+              "marginal_n": 753,
+              "marginal_bad_rate": 0.42895086321381143,
+              "bad_approved": 1153.0,
+              "n_rejected": 762.0
+            }
+          ],
+          "profit": null,
+          "constrained": [
+            {
+              "criterion": "坏账率上限 10% 下通过率最高",
+              "cutoff_score": 568.0,
+              "n_approved": 3959.0,
+              "approval_rate": 0.517516339869281,
+              "bad_rate_approved": 0.09876231371558475,
+              "feasible": true
+            },
+            {
+              "criterion": "目标通过率 70% 下的坏账率与净现金",
+              "cutoff_score": 554.0,
+              "n_approved": 5389.0,
+              "approval_rate": 0.7044444444444444,
+              "bad_rate_approved": 0.1202449434032288,
+              "feasible": true
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 554.0,
+            "n_approved": 5389,
+            "approval_rate": 0.7044444444444444,
+            "model_bad_rate": 0.1202449434032288,
+            "baseline_bad_rate": 0.22230469474856188,
+            "swap_in_n": 1618,
+            "swap_in_bad_rate": 0.1260815822002472,
+            "swap_out_n": 1618,
+            "swap_out_bad_rate": 0.46600741656365885,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 3771,
+                "share": 0.4929411764705882,
+                "bad": 444,
+                "bad_rate": 0.1177406523468576
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 1618,
+                "share": 0.2115032679738562,
+                "bad": 204,
+                "bad_rate": 0.1260815822002472
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 1618,
+                "share": 0.2115032679738562,
+                "bad": 754,
+                "bad_rate": 0.46600741656365885
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 643,
+                "share": 0.08405228758169934,
+                "bad": 290,
+                "bad_rate": 0.4510108864696734
+              }
+            ]
+          }
+        },
+        "oot": {
+          "n": 4500,
+          "bad_rate": 0.22111111111111112,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 569.0,
+              "approval_rate": 0.48977777777777776,
+              "n_approved": 2204.0,
+              "bad_rate_approved": 0.0984573502722323,
+              "bad_rate_rejected": 0.33885017421602787,
+              "marginal_n": 2204,
+              "marginal_bad_rate": 0.0984573502722323,
+              "bad_approved": 217.0,
+              "n_rejected": 2296.0
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 564.0,
+              "approval_rate": 0.5955555555555555,
+              "n_approved": 2680.0,
+              "bad_rate_approved": 0.11082089552238807,
+              "bad_rate_rejected": 0.38351648351648354,
+              "marginal_n": 476,
+              "marginal_bad_rate": 0.16806722689075632,
+              "bad_approved": 297.0,
+              "n_rejected": 1820.0
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 555.0,
+              "approval_rate": 0.698,
+              "n_approved": 3141.0,
+              "bad_rate_approved": 0.12639286851321235,
+              "bad_rate_rejected": 0.44002943340691686,
+              "marginal_n": 461,
+              "marginal_bad_rate": 0.21691973969631237,
+              "bad_approved": 397.0,
+              "n_rejected": 1359.0
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 537.0,
+              "approval_rate": 0.7982222222222223,
+              "n_approved": 3592.0,
+              "bad_rate_approved": 0.13697104677060135,
+              "bad_rate_rejected": 0.5539647577092511,
+              "marginal_n": 451,
+              "marginal_bad_rate": 0.2106430155210643,
+              "bad_approved": 492.0,
+              "n_rejected": 908.0
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 510.0,
+              "approval_rate": 0.8997777777777778,
+              "n_approved": 4049.0,
+              "bad_rate_approved": 0.16893060014818473,
+              "bad_rate_rejected": 0.6895787139689579,
+              "marginal_n": 457,
+              "marginal_bad_rate": 0.4201312910284464,
+              "bad_approved": 684.0,
+              "n_rejected": 451.0
+            }
+          ],
+          "profit": null,
+          "constrained": [
+            {
+              "criterion": "坏账率上限 10% 下通过率最高",
+              "cutoff_score": 569.0,
+              "n_approved": 2204.0,
+              "approval_rate": 0.48977777777777776,
+              "bad_rate_approved": 0.0984573502722323,
+              "feasible": true
+            },
+            {
+              "criterion": "目标通过率 70% 下的坏账率与净现金",
+              "cutoff_score": 555.0,
+              "n_approved": 3141.0,
+              "approval_rate": 0.698,
+              "bad_rate_approved": 0.12639286851321235,
+              "feasible": true
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 555.0,
+            "n_approved": 3141,
+            "approval_rate": 0.698,
+            "model_bad_rate": 0.12639286851321235,
+            "baseline_bad_rate": 0.22763451130213308,
+            "swap_in_n": 950,
+            "swap_in_bad_rate": 0.12421052631578948,
+            "swap_out_n": 950,
+            "swap_out_bad_rate": 0.4589473684210526,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 2191,
+                "share": 0.48688888888888887,
+                "bad": 279,
+                "bad_rate": 0.12733911455956184
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 950,
+                "share": 0.2111111111111111,
+                "bad": 118,
+                "bad_rate": 0.12421052631578948
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 950,
+                "share": 0.2111111111111111,
+                "bad": 436,
+                "bad_rate": 0.4589473684210526
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 409,
+                "share": 0.0908888888888889,
+                "bad": 162,
+                "bad_rate": 0.3960880195599022
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "monitor": {
+    "thresholds": {
+      "warn": 0.1,
+      "alert": 0.25
+    },
+    "psi_bins": 10,
+    "variants": {
+      "no_platform_rating": {
+        "score_psi": [
+          {
+            "segment": "test",
+            "n_expected": 17850,
+            "n_actual": 7650,
+            "psi": 0.0028161348314998886,
+            "status": "stable"
+          },
+          {
+            "segment": "oot",
+            "n_expected": 17850,
+            "n_actual": 4500,
+            "psi": 0.003062914518159902,
+            "status": "stable"
+          }
+        ],
+        "csi": [
+          {
+            "feature": "PAY_0",
+            "csi_test": 0.0013635625967273696,
+            "shift_bin": "(0.5, 1.5]",
+            "train_share": 0.12700280112044818,
+            "shift_share": 0.10933333333333334,
+            "csi_oot": 0.0030962890138123756,
+            "status": "stable"
+          },
+          {
+            "feature": "MAX_DELQ_6M",
+            "csi_test": 0.000445505993278716,
+            "shift_bin": "<= 0.5",
+            "train_share": 0.6587114845938375,
+            "shift_share": 0.6804444444444444,
+            "csi_oot": 0.0023969119252358817,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT6",
+            "csi_test": 0.0008797782950601115,
+            "shift_bin": "<= 3",
+            "train_share": 0.2443137254901961,
+            "shift_share": 0.23044444444444445,
+            "csi_oot": 0.001405381185458185,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT5",
+            "csi_test": 0.0008111999394874885,
+            "shift_bin": "(5.5, 1,970]",
+            "train_share": 0.3127731092436975,
+            "shift_share": 0.3237777777777778,
+            "csi_oot": 0.0008456811165197367,
+            "status": "stable"
+          },
+          {
+            "feature": "LIMIT_BAL",
+            "csi_test": 0.000919569323229029,
+            "shift_bin": "(145,000, 365,000]",
+            "train_share": 0.4057703081232493,
+            "shift_share": 0.3948888888888889,
+            "csi_oot": 0.0007203380705149308,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT3",
+            "csi_test": 0.0002721939765669049,
+            "shift_bin": "(32.15, 2,949]",
+            "train_share": 0.4242577030812325,
+            "shift_share": 0.43533333333333335,
+            "csi_oot": 0.0006557616424537079,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT1",
+            "csi_test": 0.0005471101834953355,
+            "shift_bin": "(4,964, 9,565]",
+            "train_share": 0.15277310924369747,
+            "shift_share": 0.14577777777777778,
+            "csi_oot": 0.0006314960432216808,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT2",
+            "csi_test": 0.0010886558924613943,
+            "shift_bin": "(4,953, 15,242]",
+            "train_share": 0.2026890756302521,
+            "shift_share": 0.1942222222222222,
+            "csi_oot": 0.0005875007044755431,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_AMT4",
+            "csi_test": 0.00036523708919535827,
+            "shift_bin": "(5, 2,014]",
+            "train_share": 0.37512605042016806,
+            "shift_share": 0.3844444444444444,
+            "csi_oot": 0.0005400482612736722,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_2",
+            "csi_test": 0.00023600881643018993,
+            "shift_bin": "<= 1.5",
+            "train_share": 0.8506442577030813,
+            "shift_share": 0.8571111111111112,
+            "csi_oot": 0.0003352236631104261,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_4",
+            "csi_test": 0.0002849219812365186,
+            "shift_bin": "> 0.5",
+            "train_share": 0.11893557422969188,
+            "shift_share": 0.11444444444444445,
+            "csi_oot": 0.00019825902221263822,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_RATIO_MEAN_5M",
+            "csi_test": 0.0012739743435166023,
+            "shift_bin": "(0.1587, 0.8003]",
+            "train_share": 0.23019607843137255,
+            "shift_share": 0.22711111111111112,
+            "csi_oot": 0.00018846834794637322,
+            "status": "stable"
+          },
+          {
+            "feature": "UTIL_MEAN_6M",
+            "csi_test": 0.0006307092894383335,
+            "shift_bin": "> 0.7975",
+            "train_share": 0.17238095238095238,
+            "shift_share": 0.17733333333333334,
+            "csi_oot": 0.00016999786184147627,
+            "status": "stable"
+          },
+          {
+            "feature": "EDUCATION",
+            "csi_test": 0.0002480243455256278,
+            "shift_bin": "{2}",
+            "train_share": 0.4668347338935574,
+            "shift_share": 0.46244444444444444,
+            "csi_oot": 0.000109266009806407,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_3",
+            "csi_test": 0.00047930918605710416,
+            "shift_bin": "(-0.5, 1.5]",
+            "train_share": 0.5258823529411765,
+            "shift_share": 0.522,
+            "csi_oot": 7.128590482339686e-05,
+            "status": "stable"
+          },
+          {
+            "feature": "BILL_TREND_3M",
+            "csi_test": 0.00010159251095086651,
+            "shift_bin": "<= -0.02627",
+            "train_share": 0.21753501400560224,
+            "shift_share": 0.21555555555555556,
+            "csi_oot": 2.4202766266877468e-05,
+            "status": "stable"
+          },
+          {
+            "feature": "PAY_5",
+            "csi_test": 7.598031534647829e-05,
+            "shift_bin": "<= -0.5",
+            "train_share": 0.336078431372549,
+            "shift_share": 0.33511111111111114,
+            "csi_oot": 4.200468741839515e-06,
+            "status": "stable"
+          }
+        ]
+      }
+    }
+  },
+  "checks": {
+    "n_pass": 12,
+    "n_warn": 1,
+    "n_fail": 0,
+    "n_info": 4,
+    "rows": [
+      {
+        "check": "样本 bad rate 在合理区间",
+        "scope": "数据",
+        "threshold": "1%–40%",
+        "value": "22.12%",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "IV 过高（疑似 leakage）",
+        "scope": "模型",
+        "threshold": "IV > 0.5",
+        "value": "4 个特征",
+        "status": "warn",
+        "detail": "已入模：PAY_0, MAX_DELQ_6M, PAY_2。清单：PAY_0 0.849, DELQ_MONTHS_6M 0.843, MAX_DELQ_6M 0.743, PAY_2 0.535。adapter 说明：PAY_0 / PAY_2 及由还款状态派生的 DELQ_MONTHS_6M、MAX_DELQ_6M 的 IV 超过 0.5：它们是 2005 年 4–9 月的还款状态，标签是 10 月是否违约，时间上在前，不是贷后信息；IV 高是因为已经逾期的人更可能继续违约（已人工核对，保留）。"
+      },
+      {
+        "check": "入模特征单一分箱占比过高",
+        "scope": "模型",
+        "threshold": "最大箱占比 > 90%",
+        "value": "最大 85.1%（PAY_2）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "train–test KS 差（LR scorecard）",
+        "scope": "模型",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.4176 − 0.4212 = -0.0036",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "train–test KS 差（GBDT challenger）",
+        "scope": "模型",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.4582 − 0.4293 = +0.0289",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "test KS 高得不合理",
+        "scope": "模型",
+        "threshold": "KS > 0.9",
+        "value": "0.4212",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → test",
+        "scope": "模型",
+        "threshold": "PSI > 0.25",
+        "value": "0.0028",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → OOT",
+        "scope": "模型",
+        "threshold": "PSI > 0.25",
+        "value": "0.0031",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 CSI（train → OOT）",
+        "scope": "模型",
+        "threshold": "CSI > 0.25",
+        "value": "0 / 17 个特征",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征缺失率过高",
+        "scope": "模型",
+        "threshold": "train 缺失率 > 50%",
+        "value": "最高 4.8%（PAY_RATIO_MEAN_5M）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "LR 系数符号（WOE 越大越安全，系数应为负）",
+        "scope": "模型",
+        "threshold": "系数 > 0",
+        "value": "0 / 17 个为正",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 VIF",
+        "scope": "模型",
+        "threshold": "VIF > 5.0",
+        "value": "最高 2.86（PAY_2）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 随机）",
+        "scope": "模型",
+        "threshold": "swap-in > swap-out",
+        "value": "12.42% vs 45.89%",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "建模警告",
+        "scope": "模型",
+        "threshold": "—",
+        "value": "—",
+        "status": "info",
+        "detail": "PAY_0: IV = 0.849 > 0.5，疑似 leakage，已保留但需人工确认"
+      },
+      {
+        "check": "建模警告",
+        "scope": "模型",
+        "threshold": "—",
+        "value": "—",
+        "status": "info",
+        "detail": "DELQ_MONTHS_6M: IV = 0.843 > 0.5，疑似 leakage，已保留但需人工确认"
+      },
+      {
+        "check": "建模警告",
+        "scope": "模型",
+        "threshold": "—",
+        "value": "—",
+        "status": "info",
+        "detail": "MAX_DELQ_6M: IV = 0.743 > 0.5，疑似 leakage，已保留但需人工确认"
+      },
+      {
+        "check": "建模警告",
+        "scope": "模型",
+        "threshold": "—",
+        "value": "—",
+        "status": "info",
+        "detail": "PAY_2: IV = 0.535 > 0.5，疑似 leakage，已保留但需人工确认"
+      }
+    ]
+  }
+}

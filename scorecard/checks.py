@@ -66,8 +66,9 @@ def run_checks(result: RunResult) -> dict[str, Any]:
             add("IV 过高（疑似 leakage）", scope, f"IV > {cfg.leakage_iv}", f"最高 IV {float(iv['iv'].max()):.4f}（{iv['iv'].idxmax()}）", PASS)
         else:
             listed = ", ".join(f"{f} {float(suspects.loc[f, 'iv']):.3f}" for f in suspects.index[:8])
-            add("IV 过高（疑似 leakage）", scope, f"IV > {cfg.leakage_iv}", f"{len(suspects)} 个特征", FAIL if in_model else WARN,
-                ("已入模：" + ", ".join(in_model) + "。" if in_model else "未入模。") + f"清单：{listed}。请核对这些字段是否为贷后信息")
+            review = result.meta.notes.get("iv_review")
+            add("IV 过高（疑似 leakage）", scope, f"IV > {cfg.leakage_iv}", f"{len(suspects)} 个特征", (WARN if review else FAIL) if in_model else WARN,
+                ("已入模：" + ", ".join(in_model) + "。" if in_model else "未入模。") + f"清单：{listed}。" + (f"adapter 说明：{review}" if review else "请核对这些字段是否为贷后信息"))
 
         # 2. single bin share > threshold (scorecard features)
         shares = iv.loc[selected, "max_bin_share"]

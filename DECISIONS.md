@@ -113,7 +113,7 @@ Phase 1 代码写完后跑了一轮 5 个视角（leakage / 数学 / adapter / �
 ### D19 swap set 基准：平台评级逐档往下批、边际档内随机；2×2 表只展示 70% 一档
 - 基准 = `meta.platform_grade_col`（LC 的 grade，有序 category），从最好一档往下批到与模型相同的通过人数；边际档内（70% 通常落在某个 grade 中间）按固定种子随机排序。不用 sub_grade 细分是刻意的：引擎只认识 adapter 声明的那一个 grade 列，不碰数据集特定字段。
 - 没有平台评级的数据集用同通过率的随机策略做基准（generic adapter 不配 platform_rating_cols 时）。
-- 2×2 表只展示最接近 `strategy.swap_set_approval_rate`（默认 0.7）的一档；5 个通过率的 swap-in / swap-out 人数与 bad rate 放在折叠汇总表，避免 20 张表。
+- 2×2 表只展示最接近 `strategy.swap_set_approval_rate`（默认 0.7；Phase 3 起改名为 `target_approval_rate`，见 D27）的一档；5 个通过率的 swap-in / swap-out 人数与 bad rate 放在折叠汇总表，避免 20 张表。
 - 第 7 节加了"swap-in bad rate 应低于 swap-out"的自动检查（OOT，展示档）。LC：不含平台评级的卡在 OOT 70% 只比 grade 好 0.25 pp，60% 一档反而输给 grade（9.55% vs 9.35%）——grade 本身含征信 + 定价信息，这是诚实的结果而不是 bug。
 - 代码：`scorecard/strategy.py` → `baseline_order`、`swap_set`。
 
@@ -134,7 +134,7 @@ Phase 1 代码写完后跑了一轮 5 个视角（leakage / 数学 / adapter / �
 ### D22 第 7 节检查项与判定语义
 - 每行：检查项 / 范围（变体）/ 阈值 / 结果 / 判定 / 说明。判定：🟢 通过、🟡 警告（需人工判断）、🔴 不通过（不应直接上线）、ℹ️ 提示（adapter / 切分 / 建模警告原样转录）。
 - PLAN 的 5 项之外补了：bad rate 在 1–40% 之间、test KS > 0.9、LR 系数为正、VIF > max_vif、swap-in 应优于 swap-out、GBDT 的 train–test KS 差。
-- IV > 0.5 的特征：未入模为警告，已入模为不通过。合成数据的 fico_mid（IV 0.805）会触发——生成器系数偏强是合成数据的特点，不改生成器以免 Phase 1 的数字变动。
+- IV > 0.5 的特征：未入模为警告，已入模为不通过（adapter 给出 `iv_review` 说明时降为警告，见 D29）。合成数据的 fico_mid 当时 IV 0.805 会触发，D28 调弱生成器后不再触发。
 - 结果只提示、不自动改模型。LC Phase 2：21 通过 / 4 警告 / 0 不通过 / 1 提示；警告 = term 单箱占比 90.7%（两套）和 7 个特征 CSI > 0.25（两套）。
 - 代码：`scorecard/checks.py`。
 
@@ -147,3 +147,40 @@ Phase 1 代码写完后跑了一轮 5 个视角（leakage / 数学 / adapter / �
 - 每张表都有 CSV（`strategy_*.csv`、`monitor_*.csv`、`checks.csv`），results.json 增加 strategy / monitor / checks 摘要。
 - 每个模块暴露 `analyse()` / `run_checks()`、`build_section()`、`write_artifacts()`、`to_summary()`；report.py 只在 `IMPLEMENTED` 为真时调用 `build_section`，占位逻辑保留给未来的节。
 - 测试 `tests/test_phase2.py`（合成数据）：cut-off 表单调、分数段人数相加、swap set 四格相加且 swap-in = swap-out 人数、PSI 恒等样本为 0 / 平移 25 分 > 0.25、CSI 捕捉人为平移、vintage 单调且末值 = cohort bad rate、植入 leakage 特征触发不通过、无 net_cash / 无评级时的跳过文案。
+
+## Phase 2 修正 + Phase 3（2026-10-19）
+
+### D25 D5 定案：按产品分卡，Lending Club 只建 36 期评分卡
+- `configs/lendingclub.yaml` → `terms_allowed: [36]`；样本定义表第 3 条"仅保留 36 期（按产品分卡）"剔除 650,603 笔 60 期贷款。
+- 理由：不同期限是不同产品（定价、客群、久期都不同）；数据截止 2018-12 时只有 2013-12 前放款的 60 期贷款才到期，OOT 窗口（2015-07 ~ 2015-12）里不可能有 60 期贷款，混合建模会让 term 在 train / OOT 之间出现结构性漂移（Phase 2 报告里 term 的 CSI 0.6447 就是这个）。
+- 结果：最终样本 589,488 笔（bad rate 14.03%），train 299,076 / test 128,176 / OOT 162,236；term 成为常数被 IV 筛掉。要建 60 期卡，改 `terms_allowed: [60]` 并把 `data_cutoff_month` / `min_issue_date` 调到 60 期能到期的窗口。
+
+### D26 **[待确认]** select 新增时间稳定性筛选（`select.max_time_csi` = 0.25）：Lending Club 上剔除 15 个征信字段，AUC 降约 0.02
+- 做法：train 内取 issue 年最早的一年（2012）与最晚的一年（2015，上半年）为两个样本，对每个通过缺失率 / IV 筛选的候选特征按评分卡分箱（含缺失箱）算 CSI，> 0.25 剔除；放在相关性筛选之前，避免不稳定的高 IV 特征挤掉稳定的相关特征。报告 2.3b 列出被剔除的特征和偏移最大的箱；无 issue_date 的数据集跳过并在漏斗里注明。
+- Lending Club：15 个特征被剔除，全部是 Missing 箱的变化——`num_tl_op_past_12m`、`tot_hi_cred_lim` 等 6 个字段 2012 年缺失 51.65%、2015 年 0%（CSI 4.8），`acc_open_past_24mths`、`mort_acc` 等 13.8% → 0%（CSI 1.0），`bc_open_to_buy`、`percent_bc_gt_75` 等 14.9% → 1%（CSI 0.4）。这些字段 2012 年中才开始由征信局提供。
+- 代价（同一 36 期样本、同一配置，只关掉筛选的对照跑，`--no-cv`）：入模 15 个特征，test AUC 0.6656 / KS 0.2378，OOT 0.6743 / 0.2508；开着筛选是 6 个特征，test 0.6473 / 0.2134，OOT 0.6508 / 0.2149。筛选换来第 6 节零漂移、评分卡只用申请时一直有的 6 个变量，代价是约 0.02 AUC（OOT 0.024），而且 OOT 上的 swap set 输给 grade 0.42 pp（第 7 节警告）。
+- 备选（已试跑）：`sample.min_issue_date: "2013-01"` 让这批字段在 train 内全程有值——筛选照常开着也保留 15 个特征，546,018 笔，test AUC 0.6624 / KS 0.2319，OOT 0.6737 / 0.2491。这是我建议的口径，但它改变了 PLAN 的 2012-01 起点，留给用户决定；本次提交按用户原话执行（2012-01 起、阈值 0.25）。
+- 代码：`scorecard/select.py` → `time_stability_table`；报告 2.3 漏斗与 2.3b。
+
+### D27 约束下的最优 cut-off 作为第 5 节主要结论；利润曲线退为参照
+- 新增 `strategy.max_bad_rate`（默认 0.10）与 `strategy.target_approval_rate`（默认 0.70，取代 Phase 2 的 `swap_set_approval_rate`；swap set 也按这档展示）。5.3 表：(a) 通过客群 bad rate ≤ 上限时通过率最高的 cut-off；(b) 目标通过率下的坏账率与净现金。报告头部也显示 (a)。
+- 第 5 节加一段按数据判断的说明：若无约束总净现金的最大点在通过率 ≥ 95%（LC：OOT 99.68%），写明平台已实施 risk-based pricing、各分数段每笔净现金接近持平、评分卡的价值在风险约束下的准入与分层定价；否则写明利润与坏账率约束指向同一方向。
+- LC（不含平台评级，OOT）：bad rate ≤ 10% → score ≥ 567，通过 56.2%，bad rate 9.95%；70% → score ≥ 561，11.27%。含平台评级：≤ 10% → score ≥ 563，66.95%。
+- 代码：`scorecard/strategy.py` → `constrained_cutoffs`；`scorecard/report.py` 头部。
+
+### D28 合成数据生成器调弱：所有特征 IV < 0.5，demo 的第 7 节全部通过
+- fico 系数 −0.03 → −0.019，其余系数居中并微调，grade 噪声 0.8 → 0.9；bad rate 27.4% → 17.9%，最高 IV fico_mid 0.39–0.41（三个测试种子），5 个特征的 LR AUC 仍 > 0.70（`tests/test_scorecard.py` 的阈值）。
+- demo 的 GBDT 改为 120 棵树 / 6 叶 / 叶最少 300 行（`configs/synthetic.yaml`）：默认 300 棵树按 30 万行设计，在 1.2 万行 train 上 train–test KS 差 0.11 会触发第 7 节警告。UCI（1.8 万行 train）同样改为 150 棵树 / 6 叶。合成 demo：25 通过 / 0 警告 / 0 不通过。
+
+### D29 UCI adapter（Phase 3）
+- `scorecard/adapters/uci.py` + `configs/uci.yaml`：`ucimlrepo` 下载 id=350 并缓存为 `data/raw/uci_default_of_credit_card_clients.csv`（gitignored）；X1..X23 用 UCI 变量表的 description 改回 LIMIT_BAL / PAY_0 等名字。
+- 沿用旧 repo（credit-default-scorecard）的决定：EDUCATION 0/5/6 → 4、MARRIAGE 0 → 3；SEX、MARRIAGE 受保护属性不入模（留在数据帧里供公平性检查）；PAY_* 按有序数值；BILL_AMT 负值保留、比率特征中按 0；11 个行为派生特征（UTIL_*、PAY_RATIO_*、DELQ_*、NO_BILL_MONTHS_6M）。参数：tree 分箱 5 箱、单调、IV ≥ 0.02、|ρ| ≤ 0.7、VIF ≤ 5、符号检查、PDO 20 / 600 / 20:1。
+- 与旧 repo 的差异：切分是 15% 分层 hold-out 充当 OOT + 其余 70/30（旧 repo 只有 70/30）；旧 repo test AUC 0.7616 / KS 0.3992，这里 test 0.7667 / 0.4212、hold-out 0.7641 / 0.4020，量级一致。
+- PAY_0（IV 0.849）等 4 个特征 IV > 0.5：adapter 通过 `meta.notes["iv_review"]` 说明它们是标签之前的还款状态、不是贷后信息；checks.py 读到该说明时把"已入模的高 IV"从不通过降为警告并附上说明（引擎不认识 PAY_0，只认识 adapter 给的说明）。
+- 无 issue_date → 时间稳定性筛选跳过；无 net_cash → 5.4 显示"数据不含回款信息，跳过"；无平台评级 → swap set 用随机基准。
+
+### D30 Phase 3 其余
+- `SKILL.md`：输入（CSV + target_col 或 adapter 名）、步骤（先 `--dry-run` 看样本定义表）、输出、护栏。护栏由 CLI 强制：不改原数据；建模前打印样本定义表；bad rate 不在 1–40% 时退出码 2（`--allow-any-bad-rate` 覆盖）；空样本停止；保留列不能做特征；第 7 节判定原样转述。
+- README.md / README_zh.md：顶部示例报告截图（`docs/images/report-lendingclub.jpg`）、一行复现命令、架构图；全部数字重抄自新报告。FAQ.md 14 题补齐。
+- CI（`.github/workflows/ci.yml`，Phase 1 已有）：ruff + pytest + 合成数据冒烟，Python 3.11 / 3.13；不跑 UCI（需要联网）。mkdocs 未做（可选项）。
+- 打 tag v1.0。

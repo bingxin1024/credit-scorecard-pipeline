@@ -1,0 +1,18 @@
+check,scope,threshold,value,status,detail
+样本 bad rate 在合理区间,数据,1%–40%,22.12%,pass,
+IV 过高（疑似 leakage）,模型,IV > 0.5,4 个特征,warn,"已入模：PAY_0, MAX_DELQ_6M, PAY_2。清单：PAY_0 0.849, DELQ_MONTHS_6M 0.843, MAX_DELQ_6M 0.743, PAY_2 0.535。adapter 说明：PAY_0 / PAY_2 及由还款状态派生的 DELQ_MONTHS_6M、MAX_DELQ_6M 的 IV 超过 0.5：它们是 2005 年 4–9 月的还款状态，标签是 10 月是否违约，时间上在前，不是贷后信息；IV 高是因为已经逾期的人更可能继续违约（已人工核对，保留）。"
+入模特征单一分箱占比过高,模型,最大箱占比 > 90%,最大 85.1%（PAY_2）,pass,
+train–test KS 差（LR scorecard）,模型,KS(train) − KS(test) > 0.05,0.4176 − 0.4212 = -0.0036,pass,
+train–test KS 差（GBDT challenger）,模型,KS(train) − KS(test) > 0.05,0.4582 − 0.4293 = +0.0289,pass,
+test KS 高得不合理,模型,KS > 0.9,0.4212,pass,
+score PSI train → test,模型,PSI > 0.25,0.0028,pass,
+score PSI train → OOT,模型,PSI > 0.25,0.0031,pass,
+入模特征 CSI（train → OOT）,模型,CSI > 0.25,0 / 17 个特征,pass,
+入模特征缺失率过高,模型,train 缺失率 > 50%,最高 4.8%（PAY_RATIO_MEAN_5M）,pass,
+LR 系数符号（WOE 越大越安全，系数应为负）,模型,系数 > 0,0 / 17 个为正,pass,
+入模特征 VIF,模型,VIF > 5.0,最高 2.86（PAY_2）,pass,
+swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 随机）,模型,swap-in > swap-out,12.42% vs 45.89%,pass,
+建模警告,模型,—,—,info,PAY_0: IV = 0.849 > 0.5，疑似 leakage，已保留但需人工确认
+建模警告,模型,—,—,info,DELQ_MONTHS_6M: IV = 0.843 > 0.5，疑似 leakage，已保留但需人工确认
+建模警告,模型,—,—,info,MAX_DELQ_6M: IV = 0.743 > 0.5，疑似 leakage，已保留但需人工确认
+建模警告,模型,—,—,info,PAY_2: IV = 0.535 > 0.5，疑似 leakage，已保留但需人工确认

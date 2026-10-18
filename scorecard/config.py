@@ -56,6 +56,7 @@ DEFAULTS: dict[str, Any] = {
         "max_vif": 5.0,
         "drop_positive_coef": True,
         "max_features": None,
+        "max_time_csi": 0.25,  # train-internal CSI (earliest vs latest issue year) above this -> dropped
     },
     "model": {
         "lr_C": 1.0,
@@ -79,7 +80,8 @@ DEFAULTS: dict[str, Any] = {
     "strategy": {
         "approval_rates": [0.5, 0.6, 0.7, 0.8, 0.9],
         "score_bands": 10,
-        "swap_set_approval_rate": 0.7,  # the candidate cut-off the 2x2 swap-set table is shown at
+        "target_approval_rate": 0.7,  # constrained cut-off (b) and the 2x2 swap-set table use this candidate
+        "max_bad_rate": 0.10,  # constrained cut-off (a): highest approval rate with approved bad rate <= this
         "profit_min_approval_rate": 0.1,  # profit-maximising cut-offs are searched at or above this
     },
     "monitor": {
@@ -186,6 +188,7 @@ class SelectConfig:
     max_vif: float
     drop_positive_coef: bool
     max_features: int | None
+    max_time_csi: float = 0.25
 
 
 @dataclass
@@ -208,7 +211,8 @@ class ScorecardConfig:
 class StrategyConfig:
     approval_rates: list[float]
     score_bands: int
-    swap_set_approval_rate: float = 0.7
+    target_approval_rate: float = 0.7
+    max_bad_rate: float = 0.10
     profit_min_approval_rate: float = 0.1
 
 

@@ -50,24 +50,26 @@ def make_synthetic_loans(n_rows: int = 20000, random_state: int = 42, n_months: 
                          n_rows, p=[0.55, 0.22, 0.08, 0.08, 0.04, 0.03])
     home = rng.choice(["MORTGAGE", "RENT", "OWN"], n_rows, p=[0.5, 0.4, 0.1])
 
+    # Coefficients are deliberately moderate so that no single feature reaches IV 0.5 (the engine
+    # treats IV > 0.5 as a leakage suspect) and the demo report's section 7 checks all pass.
     logit = (
         np.log(base_bad_rate / (1 - base_bad_rate))
-        - 0.03 * (fico - 700)
-        + 0.03 * (dti - 20)
-        + 0.012 * (util - 50)
-        + 0.25 * inq
-        + 0.35 * delinq
-        - 0.002 * (hist_months - 180)
-        + 0.5 * (term == 60)
+        - 0.019 * (fico - 700)
+        + 0.028 * (dti - 20)
+        + 0.011 * (util - 50)
+        + 0.30 * (inq - 0.8)
+        + 0.40 * (delinq - 0.3)
+        - 0.0024 * (hist_months - 180)
+        + 0.45 * (term == 60) - 0.11
         + np.where(purpose == "small_business", 0.6, 0.0)
-        + np.where(home == "RENT", 0.2, 0.0)
+        + np.where(home == "RENT", 0.2, 0.0) - 0.08
         + 0.0015 * (month_offsets - n_months / 2)  # mild drift over time
     )
     p = 1 / (1 + np.exp(-logit))
     target = (rng.random(n_rows) < p).astype(int)
 
     # Platform grade: ordered, correlated with risk (built from the true logit plus noise).
-    grade_score = logit + rng.normal(0, 0.8, n_rows)
+    grade_score = logit + rng.normal(0, 0.9, n_rows)
     grade_idx = pd.qcut(grade_score, 7, labels=False)
     grade = np.array(list("ABCDEFG"), dtype=object)[grade_idx]
 

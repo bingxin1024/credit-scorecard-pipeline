@@ -1,0 +1,9 @@
+variant,segment,cell,label,n,share,bad,bad_rate
+no_platform_rating,test,both_approve,双批（模型批、基准批）,3771,0.4929411764705882,444,0.1177406523468576
+no_platform_rating,test,swap_in,swap-in（模型批、基准拒）,1618,0.2115032679738562,204,0.1260815822002472
+no_platform_rating,test,swap_out,swap-out（模型拒、基准批）,1618,0.2115032679738562,754,0.46600741656365885
+no_platform_rating,test,both_reject,双拒（模型拒、基准拒）,643,0.08405228758169934,290,0.4510108864696734
+no_platform_rating,oot,both_approve,双批（模型批、基准批）,2191,0.48688888888888887,279,0.12733911455956184
+no_platform_rating,oot,swap_in,swap-in（模型批、基准拒）,950,0.2111111111111111,118,0.12421052631578948
+no_platform_rating,oot,swap_out,swap-out（模型拒、基准批）,950,0.2111111111111111,436,0.4589473684210526
+no_platform_rating,oot,both_reject,双拒（模型拒、基准拒）,409,0.0908888888888889,162,0.3960880195599022

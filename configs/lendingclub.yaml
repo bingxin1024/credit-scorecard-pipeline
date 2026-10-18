@@ -12,7 +12,7 @@ dataset:
     sample_frac: null         # e.g. 0.1 -> random 10 % of rows (seeded) instead of the file head
     sample_random_state: 42
     data_cutoff_month: "2018-12"  # the file's last issue month (a dataset fact, not of the subset)
-    terms_allowed: null       # e.g. [36] to build a single-term scorecard (DECISIONS.md D5)
+    terms_allowed: [36]       # one product per scorecard: 60-month loans cannot mature inside the OOT window (DECISIONS.md D25)
     net_cash_subtract_collection_fee: true
     rare_category_min_share: 0.01
     rare_category_cols: [purpose, home_ownership, addr_state]

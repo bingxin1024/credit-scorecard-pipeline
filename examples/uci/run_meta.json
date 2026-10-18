@@ -1,0 +1,38 @@
+{
+  "config_path": "configs\\uci.yaml",
+  "config_hash": "f0649da10817",
+  "git_commit": "ab257db",
+  "timestamp": "2026-10-19 02:51:23",
+  "versions": {
+    "python": "3.13.2",
+    "credit-scorecard-pipeline": "0.1.0",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1",
+    "toad": "0.1.7",
+    "matplotlib": "3.11.2"
+  },
+  "output_dir": "outputs\\uci",
+  "data_file": "data/raw/uci_default_of_credit_card_clients.csv",
+  "n_raw_rows": 30000,
+  "n_rows": 30000,
+  "cache_hit": null,
+  "timings": {
+    "load": 0.25,
+    "split": 0.02,
+    "profile": 0.05,
+    "variants": 2.37,
+    "strategy": 0.05,
+    "monitor": 0.07,
+    "checks": 0.0,
+    "artifacts": 0.03,
+    "report": 2.23,
+    "variant.no_platform_rating.binning": 0.2,
+    "variant.no_platform_rating.select_and_lr": 0.19,
+    "variant.no_platform_rating.gbdt": 0.19,
+    "variant.no_platform_rating.scoring": 0.18,
+    "variant.no_platform_rating.cv_lr": 0.57,
+    "variant.no_platform_rating.cv_gbdt": 1.02
+  },
+  "duration_seconds": 5.1
+}

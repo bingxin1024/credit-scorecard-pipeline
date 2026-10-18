@@ -10,6 +10,7 @@ _REGISTRY: dict[str, str] = {
     "lendingclub": "scorecard.adapters.lendingclub:LendingClubAdapter",
     "synthetic": "scorecard.adapters.synthetic:SyntheticAdapter",
     "generic": "scorecard.adapters.generic:GenericCSVAdapter",
+    "uci": "scorecard.adapters.uci:UCIAdapter",
 }
 
 

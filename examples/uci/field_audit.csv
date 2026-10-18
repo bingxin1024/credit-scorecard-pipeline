@@ -1,0 +1,37 @@
+column,group,decision,reason,group_name
+ID,E,drop,客户编号，无信息,identifier
+LIMIT_BAL,I,keep,授信额度（含附属卡，NT$）,candidate
+SEX,F,drop,受保护属性（公平性），两套模型都不入模；保留在数据表里供公平性检查,protected attribute
+EDUCATION,I,keep,教育程度（1 研究生 2 大学 3 高中 4 其他；0/5/6 并入 4）,candidate
+MARRIAGE,F,drop,受保护属性（公平性），两套模型都不入模；保留在数据表里供公平性检查,protected attribute
+AGE,I,keep,年龄,candidate
+PAY_0,I,keep,还款状态码（9 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+PAY_2,I,keep,还款状态码（8 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+PAY_3,I,keep,还款状态码（7 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+PAY_4,I,keep,还款状态码（6 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+PAY_5,I,keep,还款状态码（5 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+PAY_6,I,keep,还款状态码（4 月）：-2/-1/0 未逾期，1..8 逾期月数,candidate
+BILL_AMT1,I,keep,账单金额（9 月，NT$；负数 = 贷方余额）,candidate
+BILL_AMT2,I,keep,账单金额（8 月，NT$；负数 = 贷方余额）,candidate
+BILL_AMT3,I,keep,账单金额（7 月，NT$；负数 = 贷方余额）,candidate
+BILL_AMT4,I,keep,账单金额（6 月，NT$；负数 = 贷方余额）,candidate
+BILL_AMT5,I,keep,账单金额（5 月，NT$；负数 = 贷方余额）,candidate
+BILL_AMT6,I,keep,账单金额（4 月，NT$；负数 = 贷方余额）,candidate
+PAY_AMT1,I,keep,还款金额（9 月，NT$）,candidate
+PAY_AMT2,I,keep,还款金额（8 月，NT$）,candidate
+PAY_AMT3,I,keep,还款金额（7 月，NT$）,candidate
+PAY_AMT4,I,keep,还款金额（6 月，NT$）,candidate
+PAY_AMT5,I,keep,还款金额（5 月，NT$）,candidate
+PAY_AMT6,I,keep,还款金额（4 月，NT$）,candidate
+Y,A,reserved,目标：下月是否违约（1 = 违约）,target
+UTIL_1,X,keep,"max(BILL_AMT1, 0) / LIMIT_BAL：最近一个月的额度使用率",derived
+UTIL_MEAN_6M,X,keep,"6 个月 max(BILL_AMTk, 0) / LIMIT_BAL 的均值：持续的额度使用水平",derived
+UTIL_MAX_6M,X,keep,6 个月额度使用率的最大值（> 1 = 超限）,derived
+BILL_TREND_3M,X,keep,近 3 个月使用率均值 − 前 3 个月使用率均值：余额在涨还是在降,derived
+PAY_RATIO_1,X,keep,PAY_AMT1 / BILL_AMT2（上期账单的还款覆盖率，封顶 1；上期账单 <= 0 时缺失）,derived
+PAY_RATIO_MEAN_5M,X,keep,5 个月还款覆盖率的均值：全额还款型 vs 最低还款型,derived
+PAY_RATIO_MIN_5M,X,keep,5 个月还款覆盖率的最小值：最差的一个月,derived
+DELQ_MONTHS_6M,X,keep,6 个月中逾期（PAY >= 1）的月数,derived
+MAX_DELQ_6M,X,keep,"6 个月中最严重的逾期月数 max(PAY, 0)",derived
+DELQ_TREND_3M,X,keep,近 3 个月逾期月数 − 前 3 个月逾期月数：在恶化还是在恢复,derived
+NO_BILL_MONTHS_6M,X,keep,6 个月中账单 <= 0 的月数：账户不活跃,derived

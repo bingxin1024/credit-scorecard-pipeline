@@ -56,8 +56,8 @@ SEGMENT_LABELS = {TRAIN: "train", TEST: "test", OOT: "OOT"}
 PCT_COLS = {"bad_rate", "share", "missing_rate", "approval_rate", "top_share", "overall", "cum_bad_share", "cum_good_share",
             "term_60_share", "max_bin_share", "missing_share", "largest_regular_bin_share", "cum_approval_rate", "cum_bad_rate",
             "bad_rate_approved", "bad_rate_rejected", "expected_pct", "actual_pct", "target_approval_rate", "marginal_bad_rate",
-            "model_bad_rate", "baseline_bad_rate", "swap_in_bad_rate", "swap_out_bad_rate", "cum_default_rate", "train_share", "shift_share"}
-F4_COLS = {"iv", "woe", "auc", "ks", "gini", "coefficient", "vif", "psi", "csi", "csi_test", "csi_oot", "corr", "psi_contribution", "cv_auc_mean",
+            "model_bad_rate", "baseline_bad_rate", "swap_in_bad_rate", "swap_out_bad_rate", "cum_default_rate", "train_share", "shift_share", "early_share", "late_share"}
+F4_COLS = {"iv", "woe", "auc", "ks", "gini", "coefficient", "vif", "psi", "csi", "csi_test", "csi_oot", "time_csi", "corr", "psi_contribution", "cv_auc_mean",
            "cv_auc_std", "cv_ks_mean", "cv_ks_std", "factor", "offset"}
 INT_COLS = {"n", "count", "bad", "good", "removed", "remaining", "n_raw_rows", "n_rows", "n_unique", "n_bins", "n_bins_initial",
             "points_int", "step", "bin_id", "band", "n_approved", "n_rejected", "cutoff_score", "score_min", "score_max", "cum_n",
@@ -314,7 +314,10 @@ def build_section_2(result: RunResult, out_dir: Path, embed: bool) -> dict[str, 
             )
         )
         funnel_rows = [{"step": "候选特征", "dropped": np.nan, "n": len(sel)}]
-        labels = {"1_missing": f"缺失率 > {cfg.select.max_missing:.0%}", "2_iv": f"IV < {cfg.select.min_iv}", "3_corr": f"|corr| > {cfg.select.max_corr}（保留 IV 高者）",
+        years = v.selection.time_years
+        labels = {"1_missing": f"缺失率 > {cfg.select.max_missing:.0%}", "2_iv": f"IV < {cfg.select.min_iv}",
+                  "2b_time_csi": f"时间稳定性 CSI > {cfg.select.max_time_csi}（train 内 {years[0]} vs {years[1]}）" if years else "时间稳定性（无 issue_date，跳过）",
+                  "3_corr": f"|corr| > {cfg.select.max_corr}（保留 IV 高者）",
                   "4_max_features": f"超出 max_features = {cfg.select.max_features}", "5_sign": "LR 系数为正（WOE 方向反转）"}
         remaining = len(sel)
         for step, label in labels.items():
@@ -324,6 +327,17 @@ def build_section_2(result: RunResult, out_dir: Path, embed: bool) -> dict[str, 
             remaining -= n_dropped
             funnel_rows.append({"step": label, "dropped": n_dropped, "n": remaining})
         blocks.append(table_block(pd.DataFrame(funnel_rows, columns=["step", "dropped", "n"]), title=f"{prefix}2.3 特征筛选漏斗", rename={"step": "步骤", "dropped": "剔除", "n": "剩余"}))
+        if v.selection.time_csi is not None and years:
+            tc = v.selection.time_csi.merge(sel[["feature", "iv"]], on="feature", how="left").sort_values("time_csi", ascending=False)
+            dropped_tc = tc[tc["time_csi"] > cfg.select.max_time_csi]
+            tc_cols = ["feature", "iv", "time_csi", "shift_bin", "early_share", "late_share"]
+            tc_rename = {"feature": "特征", "iv": "IV", "time_csi": "time CSI", "shift_bin": "偏移最大的箱", "early_share": f"{years[0]} 占比", "late_share": f"{years[1]} 占比"}
+            if len(dropped_tc):
+                blocks.append(table_block(dropped_tc[tc_cols], title=f"{prefix}2.3b 因时间不稳定剔除的特征（train 内 {years[0]} vs {years[1]}，CSI > {cfg.select.max_time_csi}）", rename=tc_rename,
+                                          note="在 train 内部就已随时间漂移的特征（多数是某年起才有值的字段）不进评分卡，这样第 6 节的 CSI 只反映 OOT 上的真实漂移。"))
+            else:
+                blocks.append(p(f"{prefix}2.3b 时间稳定性：没有特征因 train 内 {years[0]} vs {years[1]} 的 CSI > {cfg.select.max_time_csi} 被剔除（最大 {float(tc['time_csi'].max()):.3f}，{tc.iloc[0]['feature']}）。"))
+            blocks.append(table_block(tc[tc_cols], title=f"{prefix}时间稳定性 CSI（通过缺失率与 IV 筛选的全部候选特征）", rename=tc_rename, collapsed=True))
         if v.selection.leakage_suspects:
             blocks.append(warning_block([f"IV > {cfg.select.leakage_iv} 的特征（疑似 leakage，已保留，需人工确认）：" + ", ".join(v.selection.leakage_suspects)]))
 
@@ -503,6 +517,13 @@ def build_report(result: RunResult, out_dir: Path) -> dict[str, Any]:
     for seg in (TRAIN, TEST, OOT):
         if seg in metrics.index:
             headline.append((f"{SEGMENT_LABELS[seg]} AUC / KS", f"{metrics.loc[seg, 'auc']:.4f} / {metrics.loc[seg, 'ks']:.4f}"))
+    st = result.strategy
+    if st and strategy_mod.IMPLEMENTED and st["variants"].get(primary.name):
+        segs = st["variants"][primary.name]
+        seg = OOT if OOT in segs else next(iter(segs))
+        c = segs[seg]["constrained"]["by_bad_rate"]
+        if c.get("feasible"):
+            headline.append((f"cut-off（{SEGMENT_LABELS[seg]}，bad rate ≤ {st['max_bad_rate']:.0%}）", f"score ≥ {int(c['cutoff_score'])}：通过率 {c['approval_rate']:.1%}，bad rate {c['bad_rate_approved']:.2%}"))
     return {
         "title": title,
         "header": header,

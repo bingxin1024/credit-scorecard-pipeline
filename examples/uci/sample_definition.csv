@@ -1,0 +1,3 @@
+step,rule,description,removed,remaining,bad_rate
+1,drop_missing_target,剔除 label 缺失的行,0,30000,0.2212
+2,final_sample,最终样本量与 bad rate（UCI 数据无日期、无回款，样本不再筛选）,0,30000,0.2212

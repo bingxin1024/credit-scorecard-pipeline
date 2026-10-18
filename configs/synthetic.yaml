@@ -17,6 +17,12 @@ features:
 binning:
   sample_size: 20000
 
+model:
+  gbdt:                 # the default challenger (300 trees) is sized for 300k+ rows; on 12k training
+    max_iter: 120       # rows it overfits (train-test KS gap > 0.05), so the demo uses a smaller one
+    max_leaf_nodes: 6
+    min_samples_leaf: 300
+
 report:
   title: "Synthetic 评分卡报告（演示）"
 

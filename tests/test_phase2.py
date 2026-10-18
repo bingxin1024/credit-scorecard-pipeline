@@ -35,7 +35,7 @@ def test_sections_5_to_7_render_for_both_variants(two_variant_result):
     html = (out / "report.html").read_text(encoding="utf-8")
     md = (out / "report.md").read_text(encoding="utf-8")
     assert "（本阶段未实现）" not in html and "（本阶段未实现）" not in md
-    for text in ("5.2 候选 cut-off", "5.3 利润最大化 cut-off", "swap-in", "6.1 score PSI", "6.2 入模特征 CSI", "vintage", "7.1 检查清单", "5.5 两套模型对比"):
+    for text in ("5.2 候选 cut-off", "5.3 约束下的最优 cut-off", "利润最大化 cut-off", "swap-in", "6.1 score PSI", "6.2 入模特征 CSI", "vintage", "7.1 检查清单", "两套模型对比", "2.3b 时间稳定性"):
         assert text in md, text
     assert "[含平台评级]" in md and "[不含平台评级]" in md
     assert "nan" not in md.replace("nanoseconds", "").lower().replace("financ", "")
@@ -169,3 +169,68 @@ def test_checks_fire_on_planted_leakage_and_no_net_cash(tmp_path, synthetic_fram
     md = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "数据不含回款信息，跳过" in md and "随机策略" in md
     assert "🔴 不通过" in md
+
+
+def test_constrained_cutoffs_respect_bad_rate_cap_and_target(two_variant_result):
+    st = two_variant_result.strategy
+    for segs in st["variants"].values():
+        for d in segs.values():
+            c = d["constrained"]
+            a, b = c["by_bad_rate"], c["by_approval_rate"]
+            curve = d["curve"]
+            assert a["feasible"]  # synthetic top bands are well below the 10 % cap
+            assert a["bad_rate_approved"] <= st["max_bad_rate"]
+            feasible = curve[curve["bad_rate_approved"] <= st["max_bad_rate"]]
+            assert a["approval_rate"] == feasible["approval_rate"].max()
+            assert abs(b["approval_rate"] - st["target_approval_rate"]) < 0.03
+            assert b["cutoff_score"] == d["swap"]["cutoff_score"]
+    md = (two_variant_result.output_dir / "report.md").read_text(encoding="utf-8")
+    assert "cut-off（OOT，bad rate ≤ 10%）" in md
+
+
+def test_time_stability_filter_drops_a_feature_populated_only_in_later_years(synthetic_frame):
+    from scorecard.binning import Binner
+    from scorecard.config import BinningConfig, SelectConfig
+    from scorecard.select import select_features
+
+    frame = synthetic_frame.copy()
+    years = frame[ISSUE_DATE].dt.year
+    frame["new_bureau_field"] = np.where(years == years.min(), np.nan, frame["dti"] * 1.5)  # unpopulated in the first year
+    features = ["fico_mid", "dti", "new_bureau_field", "term"]
+    y = frame[TARGET].to_numpy()
+    binner = Binner(BinningConfig("tree", "chi", 0.05, 6, True, 100000)).fit(frame[features], y, [])
+    cfg = SelectConfig(0.5, 0.02, 0.5, 0.7, 5.0, True, None, max_time_csi=0.25)
+    res = select_features(binner, frame[features], y, cfg, issue_dates=frame[ISSUE_DATE])
+    table = res.table.set_index("feature")
+    assert res.time_years[0] < res.time_years[1]
+    assert table.loc["new_bureau_field", "step"] == "2b_time_csi" and not table.loc["new_bureau_field", "selected"]
+    assert table.loc["dti", "selected"] and table.loc["fico_mid", "time_csi"] < 0.1
+    assert res.time_csi.set_index("feature").loc["new_bureau_field", "time_csi"] > 0.25
+    # without issue dates the step is skipped and the shifted feature stays in the scorecard
+    res2 = select_features(binner, frame[features], y, cfg)
+    assert res2.time_csi is None and res2.table.set_index("feature").loc["new_bureau_field", "selected"]
+
+
+def test_guardrails_dry_run_and_bad_rate_stop(tmp_path, synthetic_frame, capsys):
+    from scorecard.cli import main
+
+    csv = tmp_path / "loans.csv"
+    frame = synthetic_frame.drop(columns=["event_date", "net_cash", "grade"]).copy()
+    frame.to_csv(csv, index=False)
+    cfg_text = (
+        "dataset:\n  adapter: generic\n  path: '{path}'\n  options: {{target_col: target, date_col: issue_date, loan_amount_col: loan_amount, positive_label: {pos}}}\n"
+        "sample:\n  min_issue_date: null\nbinning: {{backend: tree}}\nmodel: {{cv_folds: 2, cv_challenger: false, gbdt: {{max_iter: 40}}}}\n"
+        "report: {{embed_figures: false}}\noutput: {{dir: '{out}'}}\n"
+    )
+    good = tmp_path / "good.yaml"
+    good.write_text(cfg_text.format(path=csv.as_posix(), pos=1, out=(tmp_path / "o1").as_posix()), encoding="utf-8")
+    assert main(["run", "--config", str(good), "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert "dry run finished" in out and (tmp_path / "o1" / "sample_definition.csv").exists()
+    assert not (tmp_path / "o1" / "report.html").exists()
+    # a wrong positive label gives a bad rate of ~82 %: the run must stop with exit code 2
+    bad = tmp_path / "bad.yaml"
+    bad.write_text(cfg_text.format(path=csv.as_posix(), pos=0, out=(tmp_path / "o2").as_posix()), encoding="utf-8")
+    assert main(["run", "--config", str(bad), "--dry-run"]) == 2
+    assert "STOP" in capsys.readouterr().out
+    assert main(["run", "--config", str(bad), "--dry-run", "--allow-any-bad-rate"]) == 0

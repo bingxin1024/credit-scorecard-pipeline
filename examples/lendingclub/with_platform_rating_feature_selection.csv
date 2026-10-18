@@ -1,104 +1,104 @@
-feature,kind,iv,missing_rate,n_bins,selected,step,reason,vif,leakage_suspect
-sub_grade,categorical,0.354593446226122,0.0,6,True,,selected,1.9336157789863606,False
-fico_mid,numeric,0.11679314772857277,0.0,6,True,,selected,1.7321589998842462,False
-loan_to_inc,numeric,0.0631826183238326,0.0,4,True,,selected,1.4080946665944234,False
-term,numeric,0.06120209344505452,0.0,2,True,,selected,1.2768978982764996,False
-acc_open_past_24mths,numeric,0.06067399483244523,0.015817808895661842,7,True,,selected,2.113600436030275,False
-bc_open_to_buy,numeric,0.058274455332842125,0.025403625280621442,4,True,,selected,2.424376795438329,False
-log_annual_inc,numeric,0.05505957943837453,0.0,6,True,,selected,1.8800782181945541,False
-tot_hi_cred_lim,numeric,0.05196597724757849,0.058387437854279835,7,True,,selected,2.464717218097743,False
-num_tl_op_past_12m,numeric,0.04926160990677848,0.058387437854279835,6,True,,selected,2.771024412662337,False
-dti,numeric,0.048265769569260375,0.0,5,True,,selected,1.2775254669513396,False
-total_rev_hi_lim,numeric,0.040510905221222755,0.058387437854279835,7,True,,selected,2.472567075813077,False
-mo_sin_rcnt_tl,numeric,0.03704167539179078,0.058387437854279835,7,True,,selected,2.1251596933282704,False
-percent_bc_gt_75,numeric,0.03508888197947246,0.025739916563406056,6,True,,selected,1.7122943721001647,False
-inq_last_6mths,numeric,0.03346308101831991,0.0,4,True,,selected,1.1921602592625415,False
-mort_acc,numeric,0.032458903215838865,0.015817808895661842,6,True,,selected,2.06971724254579,False
-verification_status,categorical,0.031277547397212536,0.0,3,True,,selected,1.2201754825905435,False
-mths_since_recent_bc,numeric,0.028773350915078034,0.024531085736099204,7,True,,selected,1.4367237897949583,False
-home_ownership,categorical,0.027562098049335265,0.0,3,True,,selected,1.8169674631215802,False
-mo_sin_old_rev_tl_op,numeric,0.027446372664322843,0.058387437854279835,6,True,,selected,1.2820717150461143,False
-num_rev_tl_bal_gt_0,numeric,0.020798779868077516,0.058387437854279835,7,True,,selected,1.3783185586135085,False
-grade,categorical,0.3364258394626547,0.0,5,False,3_corr,|corr| = 0.93 with sub_grade (IV 0.355),,False
-int_rate,numeric,0.3108748532802419,0.0,4,False,3_corr,|corr| = 0.92 with sub_grade (IV 0.355),,False
-annual_inc,numeric,0.05505957943837453,0.0,6,False,3_corr,|corr| = 1.00 with log_annual_inc (IV 0.055),,False
-avg_cur_bal,numeric,0.04983916920969026,0.0584116750638499,7,False,3_corr,|corr| = 0.85 with tot_hi_cred_lim (IV 0.052),,False
-total_bc_limit,numeric,0.047946274378283124,0.015817808895661842,5,False,3_corr,|corr| = 0.71 with bc_open_to_buy (IV 0.058),,False
-tot_cur_bal,numeric,0.039839555824018096,0.058387437854279835,5,False,3_corr,|corr| = 0.93 with tot_hi_cred_lim (IV 0.052),,False
-mths_since_recent_inq,numeric,0.032844899198039734,0.11896531352345405,7,False,3_corr,|corr| = 0.73 with inq_last_6mths (IV 0.033),,False
-bc_util,numeric,0.032277803180845964,0.026064089241405637,7,False,3_corr,|corr| = 0.79 with percent_bc_gt_75 (IV 0.035),,False
-mo_sin_rcnt_rev_tl_op,numeric,0.030659445191435604,0.058387437854279835,7,False,3_corr,|corr| = 0.74 with mo_sin_rcnt_tl (IV 0.037),,False
-revol_util,numeric,0.023333273509874082,0.0005332186105413683,7,False,5_sign,coefficient +0.0224 is not negative,,False
-num_actv_rev_tl,numeric,0.020739837444001766,0.058387437854279835,7,False,3_corr,|corr| = 0.99 with num_rev_tl_bal_gt_0 (IV 0.021),,False
-purpose,categorical,0.01899530374443749,0.0,3,False,2_iv,IV 0.0190 < 0.02,,False
-credit_hist_months,numeric,0.017314203197732147,0.0,5,False,2_iv,IV 0.0173 < 0.02,,False
-mo_sin_old_il_acct,numeric,0.013474336614502378,0.09361016266197272,4,False,2_iv,IV 0.0135 < 0.02,,False
-emp_length_years,numeric,0.011586134389034605,0.0533460982637069,4,False,2_iv,IV 0.0116 < 0.02,,False
-revol_bal,numeric,0.009987632426652963,0.0,4,False,2_iv,IV 0.0100 < 0.02,,False
-addr_state,categorical,0.009973595365327692,0.0,4,False,2_iv,IV 0.0100 < 0.02,,False
-initial_list_status,categorical,0.008089020051289865,0.0,2,False,2_iv,IV 0.0081 < 0.02,,False
-num_op_rev_tl,numeric,0.00557170172741016,0.058387437854279835,7,False,2_iv,IV 0.0056 < 0.02,,False
-num_actv_bc_tl,numeric,0.005319951164263736,0.058387437854279835,5,False,2_iv,IV 0.0053 < 0.02,,False
-total_bal_ex_mort,numeric,0.004080391863388046,0.015817808895661842,5,False,2_iv,IV 0.0041 < 0.02,,False
-total_acc,numeric,0.0036733986853103493,0.0,4,False,2_iv,IV 0.0037 < 0.02,,False
-total_il_high_credit_limit,numeric,0.003491211383101092,0.058387437854279835,4,False,2_iv,IV 0.0035 < 0.02,,False
-num_bc_tl,numeric,0.0033789144355898864,0.058387437854279835,4,False,2_iv,IV 0.0034 < 0.02,,False
-mths_since_last_record,numeric,0.002977640223540594,0.8497747454335582,3,False,1_missing,missing rate 85.0% > 50%,,False
-installment,numeric,0.0027835896317477613,0.0,2,False,2_iv,IV 0.0028 < 0.02,,False
-num_il_tl,numeric,0.0026423606781181518,0.058387437854279835,5,False,2_iv,IV 0.0026 < 0.02,,False
-num_accts_ever_120_pd,numeric,0.002428080504572397,0.058387437854279835,3,False,2_iv,IV 0.0024 < 0.02,,False
-tot_coll_amt,numeric,0.002253644655914498,0.058387437854279835,3,False,2_iv,IV 0.0023 < 0.02,,False
-pub_rec,numeric,0.00208109044587007,0.0,2,False,2_iv,IV 0.0021 < 0.02,,False
-mths_since_last_major_derog,numeric,0.0019306304200969854,0.7537438914657756,3,False,1_missing,missing rate 75.4% > 50%,,False
-pub_rec_bankruptcies,numeric,0.001846656288578414,0.0,2,False,2_iv,IV 0.0018 < 0.02,,False
-num_sats,numeric,0.0018457454200617347,0.033665484092816396,6,False,2_iv,IV 0.0018 < 0.02,,False
-num_tl_120dpd_2m,numeric,0.0018333989240001695,0.08174907822862354,2,False,2_iv,IV 0.0018 < 0.02,,False
-num_rev_accts,numeric,0.0015934272766308132,0.058387437854279835,3,False,2_iv,IV 0.0016 < 0.02,,False
-pct_tl_nvr_dlq,numeric,0.0015020869573821787,0.05868737332270935,3,False,2_iv,IV 0.0015 < 0.02,,False
-num_tl_90g_dpd_24m,numeric,0.00146188300120586,0.058387437854279835,3,False,2_iv,IV 0.0015 < 0.02,,False
-loan_amnt,numeric,0.0011224910971889554,0.0,4,False,2_iv,IV 0.0011 < 0.02,,False
-funded_amnt,numeric,0.0011129046247887427,0.0,4,False,2_iv,IV 0.0011 < 0.02,,False
-open_acc,numeric,0.0010846871483077697,0.0,3,False,2_iv,IV 0.0011 < 0.02,,False
-num_tl_30dpd,numeric,0.0010827136993958447,0.058387437854279835,2,False,2_iv,IV 0.0011 < 0.02,,False
-delinq_2yrs,numeric,0.0009229501744958948,0.0,3,False,2_iv,IV 0.0009 < 0.02,,False
-mths_since_last_delinq,numeric,0.0006109910109287862,0.5206122319137397,3,False,1_missing,missing rate 52.1% > 50%,,False
-num_bc_sats,numeric,0.0005581398662579614,0.033665484092816396,3,False,2_iv,IV 0.0006 < 0.02,,False
-mths_since_recent_bc_dlq,numeric,0.00024315016973298402,0.7619572758588303,3,False,1_missing,missing rate 76.2% > 50%,,False
-mths_since_recent_revol_delinq,numeric,0.00020122011436079677,0.6649690521130303,3,False,1_missing,missing rate 66.5% > 50%,,False
-collections_12_mths_ex_med,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-dti_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-verification_status_joint,categorical,0.0,1.0,1,False,1_missing,missing rate 100.0% > 50%,,False
-application_type,categorical,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-annual_inc_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-all_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-max_bal_bc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_rv_24m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_rv_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-il_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-total_bal_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-mths_since_rcnt_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_il_24m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_il_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_act_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-open_acc_6m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-acc_now_delinq,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-delinq_amnt,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-inq_fi,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-chargeoff_within_12_mths,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-inq_last_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-total_cu_tl,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_open_acc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_mort_acc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_inq_last_6mths,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_fico_range_high,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_fico_range_low,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-revol_bal_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-tax_liens,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-sec_app_revol_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-disbursement_method,categorical,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,False
-sec_app_mths_since_last_major_derog,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_collections_12_mths_ex_med,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_num_rev_accts,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_open_act_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_chargeoff_within_12_mths,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
-sec_app_credit_hist_months,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,False
+feature,kind,iv,missing_rate,n_bins,selected,step,reason,vif,time_csi,leakage_suspect
+sub_grade,categorical,0.31544658325445246,0.0,6,True,,selected,1.5697792138563693,0.06257716502722516,False
+fico_mid,numeric,0.130735560033748,0.0,6,True,,selected,1.4366579959871082,0.10653199094725604,False
+annual_inc,numeric,0.07391181761610666,0.0,6,True,,selected,1.285159515131939,0.013916252171478682,False
+dti,numeric,0.048066667628986454,0.0,4,True,,selected,1.08814297251535,0.06505982443685153,False
+home_ownership,categorical,0.04102233502122648,0.0,3,True,,selected,1.1065722837859695,0.010589992048322554,False
+loan_to_inc,numeric,0.03784399356700957,0.0,4,True,,selected,1.1651585117407985,0.00029797790238202267,False
+mths_since_recent_inq,numeric,0.035192505624206165,0.11798004520590084,7,True,,selected,1.0875431407083744,0.15735551849534707,False
+int_rate,numeric,0.29882467670396834,0.0,6,False,3_corr,|corr| = 0.96 with sub_grade (IV 0.315),,0.08231754804101801,False
+grade,categorical,0.2924562470138443,0.0,4,False,3_corr,|corr| = 0.93 with sub_grade (IV 0.315),,0.043233057983582915,False
+log_annual_inc,numeric,0.07391181761610666,0.0,6,False,3_corr,|corr| = 1.00 with annual_inc (IV 0.074),,0.013916252171478682,False
+total_bc_limit,numeric,0.06968351840235551,0.014056627746793457,7,False,2b_time_csi,"time CSI 1.030 > 0.25 (2012 vs 2015, bin Missing: 13.8% -> 0.0%)",,1.029916803390268,False
+tot_hi_cred_lim,numeric,0.06917666076058852,0.05250504888389573,7,False,2b_time_csi,"time CSI 4.800 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.800188668430046,False
+acc_open_past_24mths,numeric,0.06759830136560004,0.014056627746793457,7,False,2b_time_csi,"time CSI 1.076 > 0.25 (2012 vs 2015, bin Missing: 13.8% -> 0.0%)",,1.076496407248477,False
+avg_cur_bal,numeric,0.06657988023092215,0.05252176704249087,7,False,2b_time_csi,"time CSI 4.796 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.795939858098971,False
+bc_open_to_buy,numeric,0.06574257076551497,0.024100897430753387,4,False,2b_time_csi,"time CSI 0.400 > 0.25 (2012 vs 2015, bin Missing: 14.9% -> 1.0%)",,0.4004946913334049,False
+tot_cur_bal,numeric,0.0580857425776129,0.05250504888389573,7,False,2b_time_csi,"time CSI 4.796 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.795908808334692,False
+num_tl_op_past_12m,numeric,0.054048953399043594,0.05250504888389573,6,False,2b_time_csi,"time CSI 4.824 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.823555839099722,False
+total_rev_hi_lim,numeric,0.051787133696421316,0.05250504888389573,7,False,2b_time_csi,"time CSI 4.804 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.804464371708972,False
+mort_acc,numeric,0.04319054537594752,0.014056627746793457,5,False,2b_time_csi,"time CSI 1.035 > 0.25 (2012 vs 2015, bin Missing: 13.8% -> 0.0%)",,1.0350849934994681,False
+mo_sin_rcnt_tl,numeric,0.03960868458558781,0.05250504888389573,7,False,2b_time_csi,"time CSI 4.805 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.804717155304296,False
+mo_sin_rcnt_rev_tl_op,numeric,0.036896359390386484,0.05250839251561476,7,False,2b_time_csi,"time CSI 4.799 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.798698828782642,False
+mths_since_recent_bc,numeric,0.03320585376448773,0.02317136781286362,7,False,2b_time_csi,"time CSI 0.400 > 0.25 (2012 vs 2015, bin Missing: 14.7% -> 1.0%)",,0.4003129085253023,False
+percent_bc_gt_75,numeric,0.03222972231360263,0.02446869691984646,6,False,2b_time_csi,"time CSI 0.414 > 0.25 (2012 vs 2015, bin Missing: 14.9% -> 1.1%)",,0.4137374379296773,False
+inq_last_6mths,numeric,0.03189094932727067,0.0,4,False,3_corr,|corr| = 0.72 with mths_since_recent_inq (IV 0.035),,0.06079619707077476,False
+mo_sin_old_rev_tl_op,numeric,0.029186389724926726,0.05250839251561476,5,False,2b_time_csi,"time CSI 4.811 > 0.25 (2012 vs 2015, bin Missing: 51.6% -> 0.0%)",,4.8114699938788155,False
+bc_util,numeric,0.02690517950593952,0.02479302919659217,5,False,2b_time_csi,"time CSI 0.405 > 0.25 (2012 vs 2015, bin Missing: 14.9% -> 1.1%)",,0.40496858594030094,False
+purpose,categorical,0.01935566889323883,0.0,3,False,2_iv,IV 0.0194 < 0.02,,,False
+num_actv_rev_tl,numeric,0.018635911855344207,0.05250504888389573,5,False,2_iv,IV 0.0186 < 0.02,,,False
+revol_bal,numeric,0.018539222737101665,0.0,6,False,2_iv,IV 0.0185 < 0.02,,,False
+num_rev_tl_bal_gt_0,numeric,0.01842014402111138,0.05250504888389573,5,False,2_iv,IV 0.0184 < 0.02,,,False
+credit_hist_months,numeric,0.018053681687001596,0.0,5,False,2_iv,IV 0.0181 < 0.02,,,False
+emp_length_years,numeric,0.017287368242449447,0.05608942208669368,4,False,2_iv,IV 0.0173 < 0.02,,,False
+revol_util,numeric,0.017172514282410317,0.0005316374433254424,5,False,2_iv,IV 0.0172 < 0.02,,,False
+mo_sin_old_il_acct,numeric,0.015222570753600964,0.0895290829086921,4,False,2_iv,IV 0.0152 < 0.02,,,False
+verification_status,categorical,0.013776650621407802,0.0,3,False,2_iv,IV 0.0138 < 0.02,,,False
+addr_state,categorical,0.011123047387405105,0.0,4,False,2_iv,IV 0.0111 < 0.02,,,False
+total_acc,numeric,0.006703440436912489,0.0,6,False,2_iv,IV 0.0067 < 0.02,,,False
+total_bal_ex_mort,numeric,0.006667119330768593,0.014056627746793457,5,False,2_iv,IV 0.0067 < 0.02,,,False
+loan_amnt,numeric,0.005328470529733148,0.0,2,False,2_iv,IV 0.0053 < 0.02,,,False
+funded_amnt,numeric,0.005325059943471242,0.0,2,False,2_iv,IV 0.0053 < 0.02,,,False
+mths_since_last_record,numeric,0.005023896886731857,0.842508258770346,3,False,1_missing,missing rate 84.3% > 50%,,,False
+num_bc_tl,numeric,0.004883884005763081,0.05250504888389573,6,False,2_iv,IV 0.0049 < 0.02,,,False
+total_il_high_credit_limit,numeric,0.004340759851342967,0.05250504888389573,4,False,2_iv,IV 0.0043 < 0.02,,,False
+initial_list_status,categorical,0.0043034041181106274,0.0,2,False,2_iv,IV 0.0043 < 0.02,,,False
+num_op_rev_tl,numeric,0.004290659863415782,0.05250504888389573,7,False,2_iv,IV 0.0043 < 0.02,,,False
+pub_rec,numeric,0.0042290265032516846,0.0,2,False,2_iv,IV 0.0042 < 0.02,,,False
+num_actv_bc_tl,numeric,0.004140856823946631,0.05250504888389573,5,False,2_iv,IV 0.0041 < 0.02,,,False
+mths_since_last_major_derog,numeric,0.003964162255626845,0.7456900587141729,3,False,1_missing,missing rate 74.6% > 50%,,,False
+pub_rec_bankruptcies,numeric,0.003272371975863761,0.0,2,False,2_iv,IV 0.0033 < 0.02,,,False
+num_il_tl,numeric,0.00269625941137518,0.05250504888389573,3,False,2_iv,IV 0.0027 < 0.02,,,False
+num_accts_ever_120_pd,numeric,0.0026620278226078477,0.05250504888389573,3,False,2_iv,IV 0.0027 < 0.02,,,False
+tot_coll_amt,numeric,0.002508733481567542,0.05250504888389573,3,False,2_iv,IV 0.0025 < 0.02,,,False
+delinq_2yrs,numeric,0.0019284356779044538,0.0,3,False,2_iv,IV 0.0019 < 0.02,,,False
+mths_since_last_delinq,numeric,0.0016037510475650767,0.5146283887707472,3,False,1_missing,missing rate 51.5% > 50%,,,False
+pct_tl_nvr_dlq,numeric,0.0013306332176911424,0.052789257580013106,3,False,2_iv,IV 0.0013 < 0.02,,,False
+installment,numeric,0.0013085920311264564,0.0,2,False,2_iv,IV 0.0013 < 0.02,,,False
+num_rev_accts,numeric,0.0012328121094207778,0.05250504888389573,3,False,2_iv,IV 0.0012 < 0.02,,,False
+num_tl_120dpd_2m,numeric,0.0011552469195675406,0.07807045700758336,2,False,2_iv,IV 0.0012 < 0.02,,,False
+num_tl_90g_dpd_24m,numeric,0.000994007269035741,0.05250504888389573,3,False,2_iv,IV 0.0010 < 0.02,,,False
+mths_since_recent_revol_delinq,numeric,0.0008585231834627052,0.6592438042504246,3,False,1_missing,missing rate 65.9% > 50%,,,False
+mths_since_recent_bc_dlq,numeric,0.000796669853588945,0.7568912249729166,3,False,1_missing,missing rate 75.7% > 50%,,,False
+num_bc_sats,numeric,0.0007735809069474238,0.030253179793764795,3,False,2_iv,IV 0.0008 < 0.02,,,False
+num_sats,numeric,0.0007335516122025801,0.030253179793764795,3,False,2_iv,IV 0.0007 < 0.02,,,False
+open_acc,numeric,0.0006014657521072646,0.0,2,False,2_iv,IV 0.0006 < 0.02,,,False
+num_tl_30dpd,numeric,0.000106867211840107,0.05250504888389573,2,False,2_iv,IV 0.0001 < 0.02,,,False
+collections_12_mths_ex_med,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+term,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+dti_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+verification_status_joint,categorical,0.0,1.0,1,False,1_missing,missing rate 100.0% > 50%,,,False
+application_type,categorical,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+annual_inc_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+all_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+max_bal_bc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_rv_24m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_rv_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+il_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+total_bal_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+mths_since_rcnt_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_il_24m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_il_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_act_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+open_acc_6m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+acc_now_delinq,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+delinq_amnt,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+inq_fi,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+chargeoff_within_12_mths,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+inq_last_12m,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+total_cu_tl,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_open_acc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_mort_acc,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_inq_last_6mths,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_fico_range_high,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_fico_range_low,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+revol_bal_joint,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+tax_liens,numeric,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+sec_app_revol_util,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+disbursement_method,categorical,0.0,0.0,1,False,2_iv,IV 0.0000 < 0.02,,,False
+sec_app_mths_since_last_major_derog,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_collections_12_mths_ex_med,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_num_rev_accts,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_open_act_il,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_chargeoff_within_12_mths,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False
+sec_app_credit_hist_months,numeric,0.0,1.0,2,False,1_missing,missing rate 100.0% > 50%,,,False

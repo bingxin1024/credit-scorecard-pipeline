@@ -338,7 +338,7 @@ class LendingClubAdapter(Adapter):
             df = df[df["term"].isin(allowed)]
             log.add(
                 "term_filter",
-                f"只保留 term ∈ {sorted(int(t) for t in allowed)} 的贷款（config terms_allowed）",
+                f"仅保留 {' / '.join(str(int(t)) for t in sorted(allowed))} 期（按产品分卡：不同期限是不同产品，且长期限贷款在 OOT 窗口内无法到期；config terms_allowed）",
                 n_before,
                 len(df),
                 self._bad_rate(df),

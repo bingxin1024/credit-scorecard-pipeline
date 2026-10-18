@@ -4,6 +4,8 @@ Order of the filters, each recorded in the selection table with the reason it fi
 
 1. missing rate  > max_missing          -> drop
 2. IV            < min_iv               -> drop;  IV > leakage_iv -> warning, kept
+2b. time CSI     > max_time_csi         -> drop (bin distribution of the earliest vs the latest issue
+                                           year inside train, missing bin included; needs issue dates)
 3. |corr| (WOE)  > max_corr             -> keep the higher-IV feature of each pair (greedy by IV)
 4. max_features  (optional)             -> keep the top-N by IV
 5. coefficient sign (optional)          -> a WOE feature with a positive LR coefficient is dropped
@@ -33,6 +35,8 @@ class SelectionResult:
     vif: pd.Series | None = None
     corr_matrix: pd.DataFrame | None = None
     sign_dropped: list[dict[str, Any]] = field(default_factory=list)
+    time_csi: pd.DataFrame | None = None  # per feature: csi between the earliest and latest train year
+    time_years: tuple[int, int] | None = None
 
 
 def greedy_correlation_filter(woe: pd.DataFrame, iv: pd.Series, max_corr: float) -> tuple[list[str], list[dict[str, Any]]]:
@@ -55,8 +59,30 @@ def greedy_correlation_filter(woe: pd.DataFrame, iv: pd.Series, max_corr: float)
     return kept, dropped
 
 
+def time_stability_table(binner: Binner, X: pd.DataFrame, features: list[str], issue_dates: pd.Series) -> tuple[pd.DataFrame, tuple[int, int]] | None:
+    """CSI of every feature's fitted-bin distribution, earliest vs latest issue year inside train."""
+    from scorecard.monitor import psi_contributions
+
+    years = pd.to_datetime(issue_dates).dt.year
+    valid = years.notna()
+    if valid.sum() == 0 or years[valid].nunique() < 2:
+        return None
+    early, late = int(years[valid].min()), int(years[valid].max())
+    early_mask, late_mask = (years == early).to_numpy(), (years == late).to_numpy()
+    rows = []
+    for f in features:
+        spec = binner.bins_[f]
+        e = np.bincount(spec.bin_ids(X.loc[early_mask, f]), minlength=spec.n_bins) / max(early_mask.sum(), 1)
+        a = np.bincount(spec.bin_ids(X.loc[late_mask, f]), minlength=spec.n_bins) / max(late_mask.sum(), 1)
+        contrib = psi_contributions(e, a)
+        j = int(np.argmax(np.abs(a - e)))
+        rows.append({"feature": f, "time_csi": float(contrib.sum()), "early_year": early, "late_year": late,
+                     "shift_bin": spec.labels()[j], "early_share": float(e[j]), "late_share": float(a[j])})
+    return pd.DataFrame(rows), (early, late)
+
+
 def select_features(binner: Binner, X: pd.DataFrame, y: pd.Series | np.ndarray, cfg: SelectConfig,
-                    lr_C: float = 1.0, lr_max_iter: int = 1000) -> SelectionResult:
+                    lr_C: float = 1.0, lr_max_iter: int = 1000, issue_dates: pd.Series | None = None) -> SelectionResult:
     y = np.asarray(y)
     iv_table = binner.iv_table().set_index("feature")
     features = list(iv_table.index)
@@ -82,6 +108,17 @@ def select_features(binner: Binner, X: pd.DataFrame, y: pd.Series | np.ndarray, 
             leakage.append(f)
             warnings.append(f"{f}: IV = {iv:.3f} > {cfg.leakage_iv}，疑似 leakage，已保留但需人工确认")
     remaining = [f for f in features if status[f]["selected"]]
+
+    # 2b. time stability inside train (earliest vs latest issue year), so section 6 only reports real drift
+    time_csi, time_years = None, None
+    if issue_dates is not None and remaining and cfg.max_time_csi:
+        stab = time_stability_table(binner, X, remaining, issue_dates)
+        if stab is not None:
+            time_csi, time_years = stab
+            for r in time_csi.itertuples(index=False):
+                if r.time_csi > cfg.max_time_csi:
+                    status[r.feature] = {"step": "2b_time_csi", "reason": f"time CSI {r.time_csi:.3f} > {cfg.max_time_csi} ({r.early_year} vs {r.late_year}, bin {r.shift_bin}: {r.early_share:.1%} -> {r.late_share:.1%})", "selected": False}
+            remaining = [f for f in features if status[f]["selected"]]
 
     # 3. correlation on WOE values
     corr_matrix = None
@@ -144,6 +181,7 @@ def select_features(binner: Binner, X: pd.DataFrame, y: pd.Series | np.ndarray, 
                 "step": status[f]["step"],
                 "reason": status[f]["reason"],
                 "vif": float(vif[f]) if vif is not None and f in vif.index else np.nan,
+                "time_csi": float(time_csi.set_index("feature").loc[f, "time_csi"]) if time_csi is not None and f in set(time_csi["feature"]) else np.nan,
                 "leakage_suspect": f in leakage,
             }
         )
@@ -156,4 +194,6 @@ def select_features(binner: Binner, X: pd.DataFrame, y: pd.Series | np.ndarray, 
         vif=vif,
         corr_matrix=corr_matrix,
         sign_dropped=sign_dropped,
+        time_csi=time_csi,
+        time_years=time_years,
     )

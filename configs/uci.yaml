@@ -1,0 +1,39 @@
+extends: default.yaml
+
+# UCI "Default of Credit Card Clients" (UCI ML Repository id = 350), 30,000 clients, 23 raw attributes.
+# Downloaded on the first run with ucimlrepo (pip install ucimlrepo) and cached as a CSV under data/raw/.
+# Parameters follow the earlier stand-alone project (DECISIONS.md D13 / D28): decision-tree binning,
+# 5 bins, monotone, IV >= 0.02, |corr| <= 0.7, VIF <= 5, sign check, PDO 20 / 600 / 20:1.
+dataset:
+  adapter: uci
+  path: data/raw/uci_default_of_credit_card_clients.csv
+  options:
+    uci_id: 350
+    exclude_protected: [SEX, MARRIAGE]   # protected attributes: never features (kept in the frame for fairness checks)
+    engineer_features: true              # utilisation / repayment-coverage / delinquency features
+
+sample:
+  min_issue_date: null                   # no origination date in this dataset
+
+split:
+  oot_fraction: 0.15                     # no issue_date -> stratified hold-out plays the OOT role (DECISIONS.md D12)
+
+features:
+  use_platform_rating: false             # the dataset has no platform rating
+
+binning:
+  backend: tree
+  max_bins: 5
+  sample_size: 30000
+
+model:
+  gbdt:                 # 17,850 training rows: the 300-tree default overfits (train-test KS gap > 0.05)
+    max_iter: 150
+    max_leaf_nodes: 6
+    min_samples_leaf: 200
+
+report:
+  title: "UCI 信用卡违约评分卡报告"
+
+output:
+  dir: outputs/uci

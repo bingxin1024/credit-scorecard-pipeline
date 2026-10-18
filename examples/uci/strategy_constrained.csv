@@ -1,0 +1,5 @@
+variant,segment,criterion,cutoff_score,n_approved,approval_rate,bad_rate_approved,feasible
+no_platform_rating,test,坏账率上限 10% 下通过率最高,568.0,3959.0,0.517516339869281,0.09876231371558475,True
+no_platform_rating,test,目标通过率 70% 下的坏账率与净现金,554.0,5389.0,0.7044444444444444,0.1202449434032288,True
+no_platform_rating,oot,坏账率上限 10% 下通过率最高,569.0,2204.0,0.48977777777777776,0.0984573502722323,True
+no_platform_rating,oot,目标通过率 70% 下的坏账率与净现金,555.0,3141.0,0.698,0.12639286851321235,True

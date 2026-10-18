@@ -37,6 +37,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--sample-frac", type=float, default=None, help="random row fraction (seeded) instead of the file head")
     run.add_argument("--no-cache", action="store_true", help="ignore / do not write the parsed-data cache")
     run.add_argument("--no-cv", action="store_true", help="skip the challenger cross-validation (faster)")
+    run.add_argument("--dry-run", action="store_true", help="load the data, print the sample-definition table and stop (no modelling)")
+    run.add_argument("--allow-any-bad-rate", action="store_true", help="continue even if the sample bad rate is outside 1-40 %%")
     run.add_argument("-v", "--verbose", action="store_true")
 
     sub.add_parser("adapters", help="list available adapters")
@@ -65,9 +67,17 @@ def main(argv: list[str] | None = None) -> int:
         cfg.raw["model"]["cv_challenger"] = False
     out_dir = Path(args.output) if args.output else cfg.output_dir
 
+    from scorecard.pipeline import BadRateOutOfRange
     from scorecard.pipeline import run as run_pipeline
 
-    result = run_pipeline(cfg, output_dir=out_dir)
+    try:
+        result = run_pipeline(cfg, output_dir=out_dir, dry_run=args.dry_run, allow_any_bad_rate=args.allow_any_bad_rate)
+    except BadRateOutOfRange as exc:
+        print(f"STOP: {exc}")
+        return 2
+    if result is None:
+        print(f"dry run finished: sample definition written to {out_dir / 'sample_definition.csv'}")
+        return 0
     primary = result.primary
     print("")
     print(f"report : {out_dir / 'report.html'}")

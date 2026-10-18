@@ -18,7 +18,7 @@ import pandas as pd
 
 from scorecard import __version__
 from scorecard.adapters import get_adapter_class
-from scorecard.adapters.base import TARGET, AdapterMeta, validate_standard_frame
+from scorecard.adapters.base import ISSUE_DATE, TARGET, AdapterMeta, validate_standard_frame
 from scorecard.binning import Binner
 from scorecard.config import Config
 from scorecard.model import (
@@ -137,7 +137,8 @@ def fit_variant(name: str, use_platform: bool, df: pd.DataFrame, labels: pd.Seri
     timer.mark("binning")
 
     # Selection + LR
-    selection = select_features(binner, train[features], y_train, cfg.select, cfg.model.lr_C, cfg.model.lr_max_iter)
+    selection = select_features(binner, train[features], y_train, cfg.select, cfg.model.lr_C, cfg.model.lr_max_iter,
+                                issue_dates=train[ISSUE_DATE] if ISSUE_DATE in train.columns else None)
     selected = selection.selected
     warnings += selection.warnings
     if not selected:
@@ -219,7 +220,37 @@ def fit_variant(name: str, use_platform: bool, df: pd.DataFrame, labels: pd.Seri
     )
 
 
-def run(cfg: Config, output_dir: str | Path | None = None, render: bool = True) -> RunResult:
+class BadRateOutOfRange(RuntimeError):
+    """Guardrail (SKILL.md): the sample's bad rate is outside the plausible range for a credit label."""
+
+
+BAD_RATE_RANGE = (0.01, 0.40)
+
+
+def sample_definition_text(meta: AdapterMeta) -> str:
+    """Fixed-width sample-definition impact table, printed before any modelling starts."""
+    lines = [f"{'step':>4}  {'rule':<22} {'removed':>10} {'remaining':>10} {'bad rate':>9}  description"]
+    for r in meta.sample_definition_log:
+        br = f"{r['bad_rate']:.2%}" if r.get("bad_rate") is not None else "-"
+        lines.append(f"{r['step']:>4}  {r['rule']:<22} {r['removed']:>10,} {r['remaining']:>10,} {br:>9}  {r['description']}")
+    return "\n".join(lines)
+
+
+def check_bad_rate(df: pd.DataFrame, allow_any: bool = False) -> float:
+    bad_rate = float(df[TARGET].mean()) if len(df) else float("nan")
+    lo, hi = BAD_RATE_RANGE
+    if len(df) == 0:
+        raise BadRateOutOfRange("the sample definition left 0 rows; check the adapter options and sample rules")
+    if not allow_any and not (lo <= bad_rate <= hi):
+        raise BadRateOutOfRange(
+            f"sample bad rate {bad_rate:.2%} is outside {lo:.0%}-{hi:.0%}: check the label definition / positive_label "
+            "before modelling, or pass --allow-any-bad-rate to continue anyway"
+        )
+    return bad_rate
+
+
+def run(cfg: Config, output_dir: str | Path | None = None, render: bool = True, dry_run: bool = False,
+        allow_any_bad_rate: bool = False) -> RunResult | None:
     from scorecard import checks as checks_mod
     from scorecard import monitor as monitor_mod
     from scorecard import strategy as strategy_mod
@@ -248,6 +279,14 @@ def run(cfg: Config, output_dir: str | Path | None = None, render: bool = True) 
     run_info["n_rows"] = int(len(df))
     run_info["cache_hit"] = meta.notes.get("cache_hit")
     timer.mark("load")
+    # Guardrails (SKILL.md): show the sample definition first, refuse an implausible bad rate.
+    log.info("sample definition (%s):\n%s", meta.source, sample_definition_text(meta))
+    bad_rate = check_bad_rate(df, allow_any_bad_rate)
+    if dry_run:
+        pd.DataFrame(meta.sample_definition_log).to_csv(out_dir / "sample_definition.csv", index=False)
+        meta.field_audit.to_csv(out_dir / "field_audit.csv", index=False)
+        log.info("dry run: %d rows, bad rate %.2f%%, %d candidate features; stopping before modelling", len(df), 100 * bad_rate, len(meta.feature_cols))
+        return None
 
     labels, split_info = make_split(df, cfg.split)
     timer.mark("split")

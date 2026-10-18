@@ -1,8 +1,8 @@
 {
   "config_path": "configs\\synthetic.yaml",
-  "config_hash": "37cc2e51350d",
-  "git_commit": "ca6f10e",
-  "timestamp": "2026-10-19 01:16:58",
+  "config_hash": "9a370c300c47",
+  "git_commit": "ab257db",
+  "timestamp": "2026-10-19 03:00:17",
   "versions": {
     "python": "3.13.2",
     "credit-scorecard-pipeline": "0.1.0",
@@ -18,27 +18,27 @@
   "n_rows": 20000,
   "cache_hit": null,
   "timings": {
-    "load": 0.12,
-    "split": 0.02,
+    "load": 0.13,
+    "split": 0.01,
     "profile": 0.03,
-    "variants": 4.41,
-    "strategy": 0.1,
+    "variants": 2.47,
+    "strategy": 0.11,
     "monitor": 0.07,
     "checks": 0.01,
     "artifacts": 0.05,
-    "report": 4.2,
+    "report": 5.11,
     "variant.no_platform_rating.binning": 0.09,
     "variant.no_platform_rating.select_and_lr": 0.04,
-    "variant.no_platform_rating.gbdt": 0.28,
-    "variant.no_platform_rating.scoring": 0.14,
-    "variant.no_platform_rating.cv_lr": 0.21,
-    "variant.no_platform_rating.cv_gbdt": 1.39,
+    "variant.no_platform_rating.gbdt": 0.11,
+    "variant.no_platform_rating.scoring": 0.11,
+    "variant.no_platform_rating.cv_lr": 0.24,
+    "variant.no_platform_rating.cv_gbdt": 0.54,
     "variant.with_platform_rating.binning": 0.13,
     "variant.with_platform_rating.select_and_lr": 0.05,
-    "variant.with_platform_rating.gbdt": 0.29,
-    "variant.with_platform_rating.scoring": 0.13,
-    "variant.with_platform_rating.cv_lr": 0.25,
-    "variant.with_platform_rating.cv_gbdt": 1.42
+    "variant.with_platform_rating.gbdt": 0.11,
+    "variant.with_platform_rating.scoring": 0.11,
+    "variant.with_platform_rating.cv_lr": 0.29,
+    "variant.with_platform_rating.cv_gbdt": 0.63
   },
-  "duration_seconds": 9.0
+  "duration_seconds": 8.0
 }

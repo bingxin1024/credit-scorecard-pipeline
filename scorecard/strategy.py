@@ -151,6 +151,21 @@ def profit_optimum(curve: pd.DataFrame, min_approval_rate: float = 0.1) -> dict[
     return {"table": table, **picks, "min_approval_rate": min_approval_rate}
 
 
+def constrained_cutoffs(curve: pd.DataFrame, max_bad_rate: float, target_approval_rate: float) -> dict[str, Any]:
+    """(a) the loosest cut-off whose approved bad rate stays <= max_bad_rate; (b) the cut-off at the
+    target approval rate (closest actual rate) with its bad rate and net cash."""
+    cols = ["cutoff_score", "n_approved", "approval_rate", "bad_rate_approved"] + [c for c in ("net_cash_total", "net_cash_per_loan") if c in curve.columns]
+    feasible = curve[curve["bad_rate_approved"] <= max_bad_rate]
+    if feasible.empty:
+        by_bad = {"criterion": f"坏账率上限 {max_bad_rate:.0%} 下通过率最高", **{c: np.nan for c in cols}, "feasible": False}
+    else:
+        by_bad = {"criterion": f"坏账率上限 {max_bad_rate:.0%} 下通过率最高", **curve.loc[feasible["approval_rate"].idxmax(), cols].to_dict(), "feasible": True}
+    i = int(np.argmin(np.abs(curve["approval_rate"].to_numpy() - target_approval_rate)))
+    by_rate = {"criterion": f"目标通过率 {target_approval_rate:.0%} 下的坏账率与净现金", **curve.iloc[i][cols].to_dict(), "feasible": True}
+    table = pd.DataFrame([by_bad, by_rate])
+    return {"table": table, "by_bad_rate": by_bad, "by_approval_rate": by_rate, "max_bad_rate": max_bad_rate, "target_approval_rate": target_approval_rate}
+
+
 # --------------------------------------------------------------------------- §6.2 swap set
 def baseline_order(n: int, grade: pd.Series | None, rng: np.random.Generator) -> tuple[np.ndarray, str]:
     """Row order in which the baseline strategy approves loans (best first).
@@ -239,7 +254,8 @@ def analyse(result: RunResult) -> dict[str, Any]:
         "net_cash_definition": meta.notes.get("net_cash_definition"),
         "baseline": {"kind": "platform_grade" if grade_col else "random", "column": grade_col},
         "approval_rates": [float(r) for r in cfg.approval_rates],
-        "swap_set_approval_rate": float(cfg.swap_set_approval_rate),
+        "target_approval_rate": float(cfg.target_approval_rate),
+        "max_bad_rate": float(cfg.max_bad_rate),
         "profit_min_approval_rate": float(cfg.profit_min_approval_rate),
         "segments": [],
         "variants": {},
@@ -258,7 +274,7 @@ def analyse(result: RunResult) -> dict[str, Any]:
             cutoffs = pick_cutoffs(curve, cfg.approval_rates)
             grade = frame.loc[mask, grade_col] if grade_col else None
             order, _ = baseline_order(len(s), grade, np.random.default_rng(seed))
-            ref = int(np.argmin(np.abs(cutoffs["target_approval_rate"].to_numpy() - cfg.swap_set_approval_rate)))
+            ref = int(np.argmin(np.abs(cutoffs["target_approval_rate"].to_numpy() - cfg.target_approval_rate)))
             swap = swap_set(s, y, float(cutoffs["cutoff_score"].iloc[ref]), order, cash)
             swap["target_approval_rate"] = float(cutoffs["target_approval_rate"].iloc[ref])
             summary_rows = []
@@ -273,6 +289,7 @@ def analyse(result: RunResult) -> dict[str, Any]:
                 "curve": curve,
                 "cutoffs": cutoffs,
                 "profit": profit_optimum(curve, cfg.profit_min_approval_rate) if has_cash else None,
+                "constrained": constrained_cutoffs(curve, cfg.max_bad_rate, cfg.target_approval_rate),
                 "swap": swap,
                 "swap_summary": pd.DataFrame(summary_rows),
             }
@@ -295,6 +312,7 @@ def to_summary(strategy: dict[str, Any]) -> dict[str, Any]:
                 "bad_rate": d["bad_rate"],
                 "cutoffs": d["cutoffs"].to_dict(orient="records"),
                 "profit": d["profit"]["table"].to_dict(orient="records") if d["profit"] else None,
+                "constrained": d["constrained"]["table"].to_dict(orient="records"),
                 "swap_set": {**swap, "cells": d["swap"]["table"].to_dict(orient="records")},
             }
     return out
@@ -304,11 +322,12 @@ def write_artifacts(result: RunResult, out_dir: Path) -> None:
     st = result.strategy
     if not st:
         return
-    stacks: dict[str, list[pd.DataFrame]] = {"score_bands": [], "cutoffs": [], "curve": [], "swap_set": [], "swap_summary": [], "profit": []}
+    stacks: dict[str, list[pd.DataFrame]] = {"score_bands": [], "cutoffs": [], "curve": [], "swap_set": [], "swap_summary": [], "profit": [], "constrained": []}
     for name, segs in st["variants"].items():
         for seg, d in segs.items():
             for key, table in (("score_bands", d["bands"]), ("cutoffs", d["cutoffs"]), ("curve", d["curve"]), ("swap_set", d["swap"]["table"]), ("swap_summary", d["swap_summary"])):
                 stacks[key].append(table.assign(variant=name, segment=seg))
+            stacks["constrained"].append(d["constrained"]["table"].assign(variant=name, segment=seg))
             if d["profit"]:
                 stacks["profit"].append(d["profit"]["table"].assign(variant=name, segment=seg))
     for key, parts in stacks.items():
@@ -386,7 +405,7 @@ def build_section(result: RunResult, out_dir: Path, embed: bool) -> dict[str, An
                 ("候选通过率", " / ".join(f"{r:.0%}" for r in st["approval_rates"])),
                 ("利润口径", profit_text),
                 ("swap set 基准", baseline_text),
-                ("swap set 展示的 cut-off", f"候选通过率中最接近 {cfg.swap_set_approval_rate:.0%} 的一档（其余通过率见汇总表）"),
+                ("约束条件", f"坏账率上限 {cfg.max_bad_rate:.0%}（5.3 的主要结论）；目标通过率 {cfg.target_approval_rate:.0%}（5.3 的第二行，swap set 也按这一档展示）"),
             ],
             title="5.0 口径",
         )
@@ -425,7 +444,24 @@ def build_section(result: RunResult, out_dir: Path, embed: bool) -> dict[str, An
                     note="边际 = 比上一档宽松的 cut-off 多放进来的那一批客户；边际 bad rate 和边际净现金/笔决定了再放松一档是否划算。" if seg == TEST else None,
                 )
             )
+        con = pd.concat([d["constrained"]["table"].assign(segment=seg_label[seg]) for seg, d in segs.items()], ignore_index=True)
+        con_cols = ["segment", "criterion", "cutoff_score", "approval_rate", "n_approved", "bad_rate_approved"] + (["net_cash_total", "net_cash_per_loan"] if has_cash else [])
+        blocks.append(
+            table_block(
+                con[con_cols],
+                title=f"{prefix}5.3 约束下的最优 cut-off（主要结论）",
+                rename={"segment": "样本", "criterion": "准则", "cutoff_score": "cut-off", "approval_rate": "实际通过率", "n_approved": "通过人数", "bad_rate_approved": "通过客群 bad rate", "net_cash_total": "总净现金", "net_cash_per_loan": "净现金/笔"},
+                formats=money_fmt,
+                note=f"第一行：通过客群 bad rate ≤ {cfg.max_bad_rate:.0%} 的前提下通过率最高的 cut-off（空白 = 没有任何 cut-off 能满足）；第二行：通过率 {cfg.target_approval_rate:.0%} 时的坏账率与净现金。",
+            )
+        )
         if has_cash:
+            seg0 = OOT if OOT in segs else next(iter(segs))
+            bt = segs[seg0]["profit"]["best_total"]
+            if bt["approval_rate"] >= 0.95:
+                blocks.append(p(f"{seg_label[seg0]} 上无约束的总净现金在通过率 {bt['approval_rate']:.1%}（cut-off {_fmt_score(bt['cutoff_score'])}，接近全部通过）处最大：各分数段的每笔净现金接近持平，说明平台已对风险定价（risk-based pricing），低分客户的高利率覆盖了更高的损失。因此评分卡在这里的价值不是靠拒绝提高利润，而是风险约束下的准入（坏账率上限）与分层定价；本报告以 5.3 的约束下 cut-off 为主要结论，下面的利润曲线只作参照。"))
+            else:
+                blocks.append(p(f"{seg_label[seg0]} 上总净现金在通过率 {bt['approval_rate']:.1%}（cut-off {_fmt_score(bt['cutoff_score'])}）处最大，低于全部通过：低分段的利息收入不足以覆盖损失，利润与坏账率约束指向同一方向。本报告以 5.3 的约束下 cut-off 为主要结论。"))
             path = fig.plot_profit_curve(
                 {seg_label[seg]: d["curve"] for seg, d in segs.items()},
                 {seg_label[seg]: d["profit"] for seg, d in segs.items()},
@@ -438,20 +474,20 @@ def build_section(result: RunResult, out_dir: Path, embed: bool) -> dict[str, An
             blocks.append(
                 table_block(
                     rows,
-                    title=f"{prefix}5.3 利润最大化 cut-off（总净现金 vs 每笔净现金，并列报告）",
+                    title=f"{prefix}5.4 利润最大化 cut-off（无约束参照：总净现金 vs 每笔净现金）",
                     rename={"segment": "样本", "criterion": "准则", "cutoff_score": "cut-off", "approval_rate": "实际通过率", "n_approved": "通过人数", "bad_rate_approved": "通过客群 bad rate", "net_cash_total": "总净现金", "net_cash_per_loan": "净现金/笔"},
                     formats=money_fmt,
                     note=f"净现金来自实际回款（见 5.0 口径）。每笔净现金最大的 cut-off 只在通过率 ≥ {cfg.profit_min_approval_rate:.0%} 的范围内搜索，避免只剩几十个高分客户时的噪声。总净现金最大的 cut-off 通常比坏账率最低的 cut-off 宽松得多：多放进来的一档客户只要利息收入高于损失，总额就继续上升（风险定价越充分，越接近全部通过）。",
                 )
             )
         else:
-            blocks.append(kv([("利润曲线", NO_NET_CASH)], title=f"{prefix}5.3 利润曲线"))
+            blocks.append(kv([("利润曲线", NO_NET_CASH)], title=f"{prefix}5.4 利润曲线"))
         for seg, d in segs.items():
             sw = d["swap"]
             blocks.append(
                 table_block(
                     _swap_matrix(sw, has_cash),
-                    title=f"{prefix}5.4 swap set（{seg_label[seg]}；cut-off {_fmt_score(sw['cutoff_score'])}，通过率 {sw['approval_rate']:.1%}，目标 {sw['target_approval_rate']:.0%}）",
+                    title=f"{prefix}5.5 swap set（{seg_label[seg]}；cut-off {_fmt_score(sw['cutoff_score'])}，通过率 {sw['approval_rate']:.1%}，目标 {sw['target_approval_rate']:.0%}）",
                     note=_swap_interpretation(sw, baseline_label),
                 )
             )
@@ -477,7 +513,7 @@ def build_section(result: RunResult, out_dir: Path, embed: bool) -> dict[str, An
         blocks.append(
             table_block(
                 pd.DataFrame(rows),
-                title=f"5.5 两套模型对比：同通过率下的通过客群 bad rate（{la} vs {lb}）",
+                title=f"5.6 两套模型对比：同通过率下的通过客群 bad rate（{la} vs {lb}）",
                 rename={"segment": "样本", "target_approval_rate": "目标通过率", "cutoff_a": f"cut-off（{la}）", "bad_rate_a": f"bad rate（{la}）", "cutoff_b": f"cut-off（{lb}）", "bad_rate_b": f"bad rate（{lb}）", "diff_pp": "差（pp）"},
                 formats={"cutoff_a": "{:.0f}", "cutoff_b": "{:.0f}", "bad_rate_a": "{:.2%}", "bad_rate_b": "{:.2%}", "diff_pp": "{:+.2f}"},
                 note="两套模型的 cut-off 不可比（分数刻度相同但变量不同），应比较同通过率下的 bad rate。",

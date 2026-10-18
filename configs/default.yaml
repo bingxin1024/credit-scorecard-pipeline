@@ -30,6 +30,7 @@ select:
   max_vif: 5.0
   drop_positive_coef: true
   max_features: null
+  max_time_csi: 0.25          # CSI between the earliest and latest issue year inside train; above -> dropped
 
 model:
   lr_C: 1.0
@@ -52,7 +53,8 @@ scorecard:
 strategy:
   approval_rates: [0.5, 0.6, 0.7, 0.8, 0.9]   # candidate cut-offs (score >= cut-off approves)
   score_bands: 10                             # equal-frequency score bands in the band table
-  swap_set_approval_rate: 0.7                 # the candidate the 2x2 swap-set table is shown at
+  target_approval_rate: 0.7                   # constrained cut-off (b) and the 2x2 swap-set table use this candidate
+  max_bad_rate: 0.10                          # constrained cut-off (a): loosest cut-off with approved bad rate <= this
   profit_min_approval_rate: 0.1               # profit-maximising cut-offs searched at >= this approval rate
 
 monitor:

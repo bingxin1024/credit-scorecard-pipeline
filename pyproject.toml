@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit-scorecard-pipeline"
+version = "0.1.0"
+description = "Automated credit-scorecard and strategy-analysis pipeline (sample definition -> WOE binning -> LR scorecard + GBDT challenger -> cut-off / swap set / profit -> PSI / CSI / vintage) with a fixed-structure report."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "bingxin1024" }]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "matplotlib>=3.7",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+binning = ["toad>=0.1.4"]
+binning-alt = ["optbinning>=0.19"]
+dev = ["pytest>=7.4", "ruff>=0.4"]
+
+[project.scripts]
+scorecard = "scorecard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["scorecard*"]
+
+[tool.setuptools.package-data]
+scorecard = ["templates/*.j2"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = ["notebooks", "data", "examples", "outputs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]

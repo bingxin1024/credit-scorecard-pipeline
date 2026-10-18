@@ -1,0 +1,75 @@
+# Engine defaults (PLAN.md §9). Dataset configs `extends` this file and override what differs.
+# Every key here also has a built-in default in scorecard/config.py; this file documents them.
+
+sample:
+  min_issue_date: "2012-01"   # adapters that have an issue date apply it; others ignore it
+  max_issue_date: null
+
+split:
+  oot_months: 6               # last N calendar months of issue_date = OOT
+  train_ratio: 0.7            # stratified random split of the remainder
+  random_state: 42
+
+features:
+  use_platform_rating: false  # Phase 1: only the model WITHOUT platform rating
+  exclude: []
+
+binning:
+  backend: auto               # toad -> optbinning -> tree (internal), first one that imports
+  method: chi
+  min_samples: 0.05
+  max_bins: 6
+  monotonic: true
+  sample_size: 200000
+
+select:
+  max_missing: 0.5
+  min_iv: 0.02
+  leakage_iv: 0.5
+  max_corr: 0.7
+  max_vif: 5.0
+  drop_positive_coef: true
+  max_features: null
+
+model:
+  lr_C: 1.0
+  lr_max_iter: 1000
+  cv_folds: 5
+  cv_challenger: true
+  gbdt:
+    learning_rate: 0.05
+    max_iter: 300
+    max_leaf_nodes: 8
+    min_samples_leaf: 200
+    l2_regularization: 1.0
+    early_stopping: false
+
+scorecard:
+  pdo: 20
+  base_score: 600
+  base_odds: 20
+
+strategy:
+  approval_rates: [0.5, 0.6, 0.7, 0.8, 0.9]
+  score_bands: 10
+
+monitor:
+  psi_bins: 10
+  psi_warn: 0.10
+  psi_alert: 0.25
+
+checks:
+  leakage_iv: 0.5
+  single_bin_share: 0.9
+  ks_gap: 0.05
+  psi_alert: 0.25
+  missing_in_model: 0.5
+
+report:
+  title: null
+  top_missing: 20
+  top_woe_plots: 8
+  embed_figures: true
+
+output:
+  dir: outputs/run

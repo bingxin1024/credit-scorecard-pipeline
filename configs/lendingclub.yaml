@@ -1,0 +1,41 @@
+extends: default.yaml
+
+dataset:
+  adapter: lendingclub
+  path: data/raw/accepted_2007_to_2018Q4.csv.gz
+  nrows: null                 # head of the file is all late-2015 loans; for smoke runs prefer
+                              # `--sample-frac 0.1` (seeded random rows), see DECISIONS.md D4
+  cache: true
+  cache_dir: data/cache
+  options:
+    date_format: "%b-%Y"
+    sample_frac: null         # e.g. 0.1 -> random 10 % of rows (seeded) instead of the file head
+    sample_random_state: 42
+    data_cutoff_month: "2018-12"  # the file's last issue month (a dataset fact, not of the subset)
+    terms_allowed: null       # e.g. [36] to build a single-term scorecard (DECISIONS.md D5)
+    net_cash_subtract_collection_fee: true
+    rare_category_min_share: 0.01
+    rare_category_cols: [purpose, home_ownership, addr_state]
+    rare_category_label: OTHER_RARE   # must not collide with real values ('other', 'OTHER')
+    # Field audit groups (PLAN.md §4.3). Anything not listed is group I (candidate feature).
+    field_groups:
+      A: [loan_status]
+      B: [total_pymnt, total_pymnt_inv, total_rec_prncp, total_rec_int, total_rec_late_fee,
+          recoveries, collection_recovery_fee, out_prncp, out_prncp_inv, last_pymnt_d,
+          last_pymnt_amnt, next_pymnt_d, last_credit_pull_d]
+      C: [last_fico_range_high, last_fico_range_low]
+      D: ["hardship_*", "settlement_*", "debt_settlement_flag*", deferral_term,
+          payment_plan_start_date, orig_projected_additional_accrued_interest, pymnt_plan]
+      E: [id, member_id, url, desc, title, policy_code, emp_title, zip_code]
+      F: [funded_amnt_inv]
+      G: [grade, sub_grade, int_rate, installment]
+      H: [annual_inc_joint, dti_joint, verification_status_joint, revol_bal_joint, "sec_app_*"]
+
+sample:
+  min_issue_date: "2012-01"
+
+report:
+  title: "Lending Club 信用评分卡与策略分析报告"
+
+output:
+  dir: outputs/lendingclub

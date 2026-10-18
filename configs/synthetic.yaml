@@ -1,0 +1,21 @@
+extends: default.yaml
+
+# No data needed: a seeded synthetic loan book. Used by tests, CI and as a 10-second demo.
+dataset:
+  adapter: synthetic
+  options:
+    n_rows: 20000
+    n_months: 36
+    base_bad_rate: 0.15
+
+sample:
+  min_issue_date: null
+
+binning:
+  sample_size: 20000
+
+report:
+  title: "Synthetic 评分卡报告（演示）"
+
+output:
+  dir: outputs/synthetic

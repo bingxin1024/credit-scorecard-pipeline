@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev]"
+          python -m pip install toad || echo "toad unavailable, internal tree backend will be used"
+      - name: Lint
+        run: ruff check .
+      - name: Test (synthetic data only)
+        run: pytest -q
+      - name: Smoke run (synthetic config)
+        run: python -m scorecard run --config configs/synthetic.yaml --output outputs/ci

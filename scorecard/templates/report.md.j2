@@ -1,0 +1,79 @@
+# {{ title }}
+
+{% for k, v in header %}- **{{ k }}**：{{ v }}
+{% endfor %}
+
+{% for k, v in headline %}- **{{ k }}**：{{ v }}
+{% endfor %}
+{% if warnings %}
+
+> **运行警告**
+{% for w in warnings %}> - {{ w }}
+{% endfor %}
+{% endif %}
+
+{% for s in sections %}
+## {% if s.number <= 7 %}{{ s.number }}. {% endif %}{{ s.title }}
+
+{% if s.intro %}_{{ s.intro }}_
+
+{% endif %}
+{% for b in s.blocks %}
+{% if b.type == "p" %}
+{{ b.text }}
+
+{% elif b.type == "kv" %}
+{% if b.title %}### {{ b.title }}
+
+{% endif %}
+{% for k, v in b["items"] %}- **{{ k }}**：{{ v }}
+{% endfor %}
+
+{% elif b.type == "table" %}
+{% if b.title %}### {{ b.title }}
+
+{% endif %}
+{{ md_table(b) }}
+
+{% if b.truncated %}（只显示前 {{ b.n_rows }} 行）
+
+{% endif %}
+{% if b.note %}_{{ b.note }}_
+
+{% endif %}
+{% elif b.type == "figure" %}
+![{{ b.caption }}]({{ b.path }})
+
+_{{ b.caption }}_
+
+{% elif b.type == "list" %}
+{% if b.title %}### {{ b.title }}
+
+{% endif %}
+{% for it in b["items"] %}- {{ it }}
+{% endfor %}
+
+{% elif b.type == "warning" %}
+> **{{ b.title }}**
+{% for it in b["items"] %}> - {{ it }}
+{% endfor %}
+
+{% elif b.type == "placeholder" %}
+**{{ b.text }}**
+
+{% if b.planned %}本节计划内容：
+{% for it in b.planned %}- {{ it }}
+{% endfor %}
+{% endif %}
+
+{% elif b.type == "code" %}
+<details><summary>{{ b.title }}</summary>
+
+```yaml
+{{ b.text }}```
+
+</details>
+
+{% endif %}
+{% endfor %}
+{% endfor %}

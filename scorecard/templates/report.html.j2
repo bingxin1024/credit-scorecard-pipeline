@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root { --ink: #1a1a1a; --muted: #666; --line: #e3e3e3; --bg: #fff; --accent: #2a78d6; --warn-bg: #fff6e5; --warn-line: #f0b429; --ph-bg: #f5f5f5; }
+  body { font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif; color: var(--ink); background: var(--bg); margin: 0; line-height: 1.55; }
+  main { max-width: 1120px; margin: 0 auto; padding: 24px 20px 80px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 8px; padding-top: 12px; border-top: 2px solid var(--ink); }
+  h3 { font-size: 15px; margin: 24px 0 6px; }
+  p { margin: 6px 0 10px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .meta span { margin-right: 18px; }
+  .headline { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
+  .headline div { border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; min-width: 150px; }
+  .headline .k { font-size: 12px; color: var(--muted); }
+  .headline .v { font-size: 16px; font-weight: 600; }
+  nav ol { columns: 2; padding-left: 20px; font-size: 14px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  .intro { color: var(--muted); font-size: 14px; }
+  table { border-collapse: collapse; font-size: 12.5px; margin: 6px 0 4px; max-width: 100%; }
+  th, td { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; white-space: nowrap; }
+  th { background: #f7f7f7; font-weight: 600; position: sticky; top: 0; }
+  td:nth-child(n+3), th:nth-child(n+3) { text-align: right; }
+  td:first-child, th:first-child, td:nth-child(2), th:nth-child(2) { text-align: left; }
+  .table-wrap { overflow-x: auto; }
+  .note { color: var(--muted); font-size: 12.5px; margin: 2px 0 10px; }
+  details { margin: 6px 0 10px; }
+  summary { cursor: pointer; color: var(--accent); font-size: 13.5px; }
+  figure { margin: 14px 0 18px; }
+  figure img { max-width: 100%; height: auto; border: 1px solid var(--line); }
+  figcaption { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 18px; font-size: 13.5px; margin: 6px 0 10px; }
+  .kv .k { color: var(--muted); }
+  .warning { background: var(--warn-bg); border-left: 4px solid var(--warn-line); padding: 8px 12px; margin: 10px 0; font-size: 13.5px; }
+  .placeholder { background: var(--ph-bg); border: 2px dashed #bbb; padding: 14px 16px; margin: 12px 0; }
+  .placeholder .tag { font-weight: 700; font-size: 15px; }
+  .placeholder ul { margin: 6px 0 0; }
+  pre { background: #f7f7f7; padding: 10px; font-size: 12px; overflow-x: auto; }
+  ul.plain { margin: 4px 0 10px; padding-left: 20px; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<main>
+<h1>{{ title }}</h1>
+<div class="meta">{% for k, v in header %}<span><b>{{ k }}</b> {{ v }}</span>{% endfor %}</div>
+<div class="headline">
+{% for k, v in headline %}
+  <div><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+{% endfor %}
+</div>
+{% if warnings %}
+<div class="warning"><b>运行警告</b><ul class="plain">{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul></div>
+{% endif %}
+<nav><ol>
+{% for s in sections %}
+  <li><a href="#s{{ s.number }}">{{ s.title }}{% if not s.implemented %} {{ placeholder }}{% endif %}</a></li>
+{% endfor %}
+</ol></nav>
+
+{% for s in sections %}
+<section id="s{{ s.number }}">
+<h2>{% if s.number <= 7 %}{{ s.number }}. {% endif %}{{ s.title }}</h2>
+{% if s.intro %}<p class="intro">{{ s.intro }}</p>{% endif %}
+{% for b in s.blocks %}
+  {% if b.type == "p" %}
+  <p>{{ b.text }}</p>
+  {% elif b.type == "kv" %}
+  {% if b.title %}<h3>{{ b.title }}</h3>{% endif %}
+  <div class="kv">{% for k, v in b["items"] %}<div class="k">{{ k }}</div><div>{{ v }}</div>{% endfor %}</div>
+  {% elif b.type == "table" %}
+  {% if b.title and not b.collapsed %}<h3>{{ b.title }}</h3>{% endif %}
+  {% if b.collapsed %}<details><summary>{{ b.title or "展开表格" }}（{{ b.n_rows }} 行）</summary>{% endif %}
+  <div class="table-wrap"><table>
+    <thead><tr>{% for c in b.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for row in b.rows %}<tr>{% for c in row %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+  </table></div>
+  {% if b.truncated %}<div class="note">（只显示前 {{ b.n_rows }} 行）</div>{% endif %}
+  {% if b.note %}<div class="note">{{ b.note }}</div>{% endif %}
+  {% if b.collapsed %}</details>{% endif %}
+  {% elif b.type == "figure" %}
+  <figure><img src="{{ b.data_uri or b.path }}" alt="{{ b.caption }}"><figcaption>{{ b.caption }}</figcaption></figure>
+  {% elif b.type == "list" %}
+  {% if b.title %}<h3>{{ b.title }}</h3>{% endif %}
+  <ul class="plain">{% for it in b["items"] %}<li>{{ it }}</li>{% endfor %}</ul>
+  {% elif b.type == "warning" %}
+  <div class="warning"><b>{{ b.title }}</b><ul class="plain">{% for it in b["items"] %}<li>{{ it }}</li>{% endfor %}</ul></div>
+  {% elif b.type == "placeholder" %}
+  <div class="placeholder"><span class="tag">{{ b.text }}</span>
+    {% if b.planned %}<div class="note">本节计划内容：</div><ul>{% for it in b.planned %}<li>{{ it }}</li>{% endfor %}</ul>{% endif %}
+  </div>
+  {% elif b.type == "code" %}
+  <details><summary>{{ b.title }}</summary><pre>{{ b.text }}</pre></details>
+  {% endif %}
+{% endfor %}
+</section>
+{% endfor %}
+</main>
+</body>
+</html>

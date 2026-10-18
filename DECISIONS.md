@@ -94,3 +94,56 @@ Phase 1 代码写完后跑了一轮 5 个视角（leakage / 数学 / adapter / �
 - `field_groups` 若在 YAML 里漏掉 B / C / D 的内置泄漏模式，adapter 自动补回并警告。
 - 报告：issue 年不再带千分位；IV 表按 IV 降序；筛选漏斗列序；"缺失率（train）"标注；第 3 节结尾按实际变体措辞；附录耗时含 report 步骤；缓存命中正确记录；第 2 节按变体循环；LC 专有措辞移到 adapter 的 `meta.notes`。
 - 未改（记录）：CV 的入模变量清单固定自全 train（D9），README 措辞已改正；到期规则导致的 term 构成差异见 D5，adapter 现在会在报告警告里直接写出各期限的完整放款窗口。
+
+## Phase 2（2026-10-19）
+
+### D17 cut-off 的匹配规则：取实际通过率最接近目标的整数分数，并报告边际一档
+- 分数是整数，50/60/70/80/90% 的目标通过率不可能精确命中。选择：在"按分数降序累计"的曲线上取 |实际通过率 − 目标| 最小的 cut-off，表里同时给出目标与实际通过率（LC test 70% → cut-off 558，实际 69.55%）。
+- 候选 cut-off 表增加"边际新增人数 / 边际 bad rate / 边际净现金/笔"：相邻两档之间多放进来的客户才是放松 cut-off 的真实代价，比累计 bad rate 更能回答"再放一档划不划算"。
+- 分数段表按分数分位数切右闭区间（不重叠），人数近似相等而非严格等频；PLAN 的"等频 10 段"按此解释，报告注明。
+- 代码：`scorecard/strategy.py` → `cutoff_curve`、`pick_cutoffs`、`score_bands`。
+
+### D18 利润曲线：名义净现金、不折现；每笔净现金最大化只在通过率 ≥ 10% 内搜索
+- net_cash 按 D3（total_pymnt − collection_recovery_fee − funded_amnt），名义金额，不折现、不扣资金与运营成本，报告 5.0 口径写明。
+- 每笔净现金的曲线在通过率很低时只剩几十个高分客户、噪声极大，所以只在通过率 ≥ `strategy.profit_min_approval_rate`（默认 0.1）内取最大值；总净现金不受此限制。另给"全部通过"参照行。
+- LC 结果：风险定价使 test 上各分数段的净现金/笔几乎持平（最高分段 1,380，最低分段 1,665），总净现金在 100% 通过时最大；OOT（2015H2 放款）最低分段只剩 73/笔，总净现金最大点移到 cut-off 535 / 98.60%。在定价充分的平台上"利润最大化 cut-off"接近全部通过，模型的价值在定价与分层而不是拒绝——FAQ 8。
+- net_cash 缺失按 0 处理并在报告注明行数（LC 为 0 行）。
+- 代码：`scorecard/strategy.py` → `profit_optimum`。
+
+### D19 swap set 基准：平台评级逐档往下批、边际档内随机；2×2 表只展示 70% 一档
+- 基准 = `meta.platform_grade_col`（LC 的 grade，有序 category），从最好一档往下批到与模型相同的通过人数；边际档内（70% 通常落在某个 grade 中间）按固定种子随机排序。不用 sub_grade 细分是刻意的：引擎只认识 adapter 声明的那一个 grade 列，不碰数据集特定字段。
+- 没有平台评级的数据集用同通过率的随机策略做基准（generic adapter 不配 platform_rating_cols 时）。
+- 2×2 表只展示最接近 `strategy.swap_set_approval_rate`（默认 0.7）的一档；5 个通过率的 swap-in / swap-out 人数与 bad rate 放在折叠汇总表，避免 20 张表。
+- 第 7 节加了"swap-in bad rate 应低于 swap-out"的自动检查（OOT，展示档）。LC：不含平台评级的卡在 OOT 70% 只比 grade 好 0.25 pp，60% 一档反而输给 grade（9.55% vs 9.35%）——grade 本身含征信 + 定价信息，这是诚实的结果而不是 bug。
+- 代码：`scorecard/strategy.py` → `baseline_order`、`swap_set`。
+
+### D20 PSI / CSI 口径
+- score PSI 的分段 = train 分数的 10 个分位数切点（去重；整数分数并列时段数可能少于 10），右闭区间，test / OOT 套同一套边界。CSI 直接用评分卡的分箱（含缺失箱），即"该特征分箱分布的 PSI"。
+- 占比为 0 的段按 1e-4 处理（行业惯例）。后果：一个箱从 5.84% 变成 0% 贡献 0.37——LC 的 6 个征信字段（`num_tl_op_past_12m`、`tot_hi_cred_lim` 等）2015 年后不再缺失，CSI 全部 > 0.25，而 score PSI 只有 0.027。这正是 FAQ 10 的"分数稳定、特征不稳"情形；报告 6.2 的"偏移最大的箱"列直接指出是 Missing 箱。
+- `term` CSI 0.6447：D5 预告的结果（OOT 只有 36 期）。仍按 PLAN 保留 term 入模；要消除它用 `terms_allowed: [36]`。
+- 判定以 train → OOT 为准（没有 OOT 时用 test）；阈值 `monitor.psi_warn / psi_alert` = 0.10 / 0.25，表里用 🟢🟡🔴 文本标色（HTML 与 Markdown 一致，不依赖 CSS）。
+- 代码：`scorecard/monitor.py` → `score_psi`、`feature_csi`、`status`。
+
+### D21 vintage：账龄 = event_date − issue_date；截止月取 adapter 的 data_cutoff_month 与数据里最晚违约事件月的较大者
+- Lending Club 没有逐月表现，adapter 把 last_pymnt_d 作为 `event_date`；报告写明曲线比真实 Charged Off 时点早约 4–5 个月（adapter 的 `event_date_note`，引擎不认识 last_pymnt_d）。
+- 没有 last_pymnt_d 的违约（从未还款，LC 443 笔）记为账龄 0；账龄超过 `monitor.vintage_max_mob`（默认 60）的违约（LC 27 笔）计入最后一个月。
+- 观察期：截止月 = max(adapter 的 data_cutoff_month，最晚 issue 月，最晚违约事件月)，LC 为 2019-03（charged-off 贷款的 last_pymnt_d 可以晚于 2018-12）；超过观察期的格子留空。好客户的 event_date 是结清月，不参与截止月（否则合成数据会把截止月推到 2022-12）。
+- 2014 年起的 cohort 只有 36 期贷款（D5），曲线在 36 个月后走平；2012–2013 含 60 期，继续升到 60 个月。
+- 代码：`scorecard/monitor.py` → `vintage_table`；`scorecard/adapters/lendingclub.py` → `event_date_note`。
+
+### D22 第 7 节检查项与判定语义
+- 每行：检查项 / 范围（变体）/ 阈值 / 结果 / 判定 / 说明。判定：🟢 通过、🟡 警告（需人工判断）、🔴 不通过（不应直接上线）、ℹ️ 提示（adapter / 切分 / 建模警告原样转录）。
+- PLAN 的 5 项之外补了：bad rate 在 1–40% 之间、test KS > 0.9、LR 系数为正、VIF > max_vif、swap-in 应优于 swap-out、GBDT 的 train–test KS 差。
+- IV > 0.5 的特征：未入模为警告，已入模为不通过。合成数据的 fico_mid（IV 0.805）会触发——生成器系数偏强是合成数据的特点，不改生成器以免 Phase 1 的数字变动。
+- 结果只提示、不自动改模型。LC Phase 2：21 通过 / 4 警告 / 0 不通过 / 1 提示；警告 = term 单箱占比 90.7%（两套）和 7 个特征 CSI > 0.25（两套）。
+- 代码：`scorecard/checks.py`。
+
+### D23 两套模型并排：configs/lendingclub.yaml 与 configs/synthetic.yaml 都设 `use_platform_rating: [false, true]`
+- 第 5–7 节与 2–4 节一样按变体循环加前缀；第 5 节末尾新增 5.5 表，按同通过率比较两套模型的通过客群 bad rate（cut-off 本身不可比）。
+- 含平台评级时 sub_grade 以 IV 0.3546 入模，grade / int_rate / installment 被相关性过滤掉，入模仍是 20 个变量。OOT AUC 0.6750 → 0.6978，70% 通过率下 bad rate 10.60% → 9.91%。
+- 全量运行时间 80 s → 145 s（两套各跑一遍 binning / GBDT / CV）。
+
+### D24 第 5–7 节的 artifacts 与测试
+- 每张表都有 CSV（`strategy_*.csv`、`monitor_*.csv`、`checks.csv`），results.json 增加 strategy / monitor / checks 摘要。
+- 每个模块暴露 `analyse()` / `run_checks()`、`build_section()`、`write_artifacts()`、`to_summary()`；report.py 只在 `IMPLEMENTED` 为真时调用 `build_section`，占位逻辑保留给未来的节。
+- 测试 `tests/test_phase2.py`（合成数据）：cut-off 表单调、分数段人数相加、swap set 四格相加且 swap-in = swap-out 人数、PSI 恒等样本为 0 / 平移 25 分 > 0.25、CSI 捕捉人为平移、vintage 单调且末值 = cohort bad rate、植入 leakage 特征触发不通过、无 net_cash / 无评级时的跳过文案。

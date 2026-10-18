@@ -1,8 +1,9 @@
 # FAQ — interview questions this project answers
 
 Each answer: a spoken-style reply (≤ 150 words), the file / report section that backs it, and the
-actual numbers from `examples/lendingclub/report.md` (Phase 1 run; numbers are copied, never typed
-from memory). Questions 8–12 are only partly answerable until Phase 2 ships sections 5–7.
+actual numbers from `examples/lendingclub/report.md` (Phase 2 run with both scorecard variants;
+numbers are copied, never typed from memory; unless stated otherwise they refer to the
+no-platform-rating scorecard).
 
 ### 1. How is the default label defined? Why drop unmatured and indeterminate loans? What is the performance window?
 
@@ -94,32 +95,62 @@ base points = Offset − Factor × b0 and each bin scores −Factor × bᵢ × W
 
 ### 8. How is the cut-off chosen? Why do the profit-maximising and lowest-bad-rate cut-offs differ?
 
-*Phase 2.* Candidate cut-offs are read off the approval-rate / bad-rate curve (50–90 % approval);
-profit uses realised net cash (`total_pymnt − collection_recovery_fee − funded_amnt`). The
-lowest bad rate is always at the tightest cut-off, but each extra approved tranche still earns
-interest from its goods, so total profit peaks where the marginal tranche's interest just covers
-its losses — usually far looser than the bad-rate minimum.
+Candidate cut-offs are read off the approval-rate / bad-rate curve on test and OOT: for each
+target approval rate (50–90 %) we take the integer score whose actual approval rate is closest, and
+report the bad rate of the approved loans plus the *marginal* tranche — the loans a looser cut-off
+adds and their bad rate. Profit uses realised net cash (`total_pymnt − collection_recovery_fee −
+funded_amnt`, nominal and undiscounted). The lowest bad rate is always at the tightest cut-off, but
+every extra tranche still earns interest from its goods, so total net cash keeps rising as long as
+the marginal tranche's interest covers its losses. Lending Club prices risk, so on the test sample
+net cash per loan is almost flat across score bands and total net cash peaks at "approve everyone";
+on OOT (2015 H2 loans) the bottom band earns almost nothing and the total-profit cut-off moves to
+98.6 % approval. Per-loan net cash peaks near 10–20 % approval. The scorecard's value on such a
+platform is pricing and tiering rather than rejection.
 
-*Where:* `scorecard/strategy.py` (Phase 2), report §5.
+*Where:* `scorecard/strategy.py` (`cutoff_curve`, `pick_cutoffs`, `profit_optimum`), report §5.2–5.3.
+*Numbers:* 70 % approval ↔ cut-off 558 on test (actual 69.55 %, approved bad rate 10.63 % vs
+14.90 % overall, marginal tranche 16.64 %) and cut-off 560 on OOT (70.88 %, 10.60 %). Total net
+cash peaks at 100 % approval on test (193.9 M) and at cut-off 535 / 98.60 % approval on OOT
+(129.0 M vs 128.2 M for approve-all); per-loan net cash peaks at cut-off 584 / 19.76 % on test
+(1,419 per loan vs 1,371 approve-all) and cut-off 596 / 10.74 % on OOT (1,239 vs 790).
 
 ### 9. How to read a swap set? What if swap-ins have a higher bad rate than swap-outs?
 
-*Phase 2.* At equal approval rate, swap-ins are loans the scorecard approves that the baseline
-(platform grade) rejects; swap-outs the reverse. The model adds value when swap-ins have a lower
-bad rate than swap-outs. If it is the other way round, the model is worse than the baseline on
-exactly the loans where they disagree — stop and check leakage, segment shift, or the baseline.
+At equal approval rate, swap-ins are loans the scorecard approves that the baseline rejects,
+swap-outs the reverse; both cells hold the same number of loans by construction, so their bad rates
+are directly comparable. The baseline is the platform grade, approving from A downwards until the
+model's approval count is reached (ties inside the marginal grade broken at random with a fixed
+seed). The model adds value when swap-ins have a lower bad rate than swap-outs — those are exactly
+the loans the two strategies disagree on. If it is the other way round, the model is worse than the
+baseline where it matters: stop and check leakage, a population shift the baseline handles better,
+or whether the baseline uses information the model is not allowed to. On Lending Club the
+no-platform-rating scorecard only narrowly beats the grade on OOT, and at 60 % approval the grade
+wins — unsurprising, since `grade` is built from the same bureau data plus the platform's pricing.
+Section 7 runs this comparison as an automatic check.
 
-*Where:* `scorecard/strategy.py` (Phase 2), report §5.
+*Where:* `scorecard/strategy.py` (`baseline_order`, `swap_set`), report §5.4; check in §7.
+*Numbers (OOT, cut-off 560 ≈ 70 % approval):* swap-in 21,643 loans at 18.63 % vs swap-out 21,643
+at 19.97 %; approved bad rate model 10.60 % vs grade baseline 10.85 % (−0.25 pp). Test: 17.38 % vs
+20.16 %, 10.63 % vs 11.16 % (−0.53 pp). With the platform rating in the model: OOT 16.25 % vs
+22.09 %, 9.91 % vs 10.70 % (−0.79 pp).
 
 ### 10. PSI formula and the 0.10 / 0.25 thresholds; score PSI stable but a feature CSI high?
 
-*Phase 2.* PSI = Σ (actual% − expected%) × ln(actual% / expected%) over 10 train-decile bands.
-0.10 / 0.25 are industry conventions (roughly: no action / investigate / act). A stable score
-with one unstable feature means the population moved on that feature while the others offset it;
-keep monitoring, but check whether the bin definition still makes sense and whether the feature's
-meaning changed (e.g. a bureau field that started being populated).
+PSI = Σ (actual% − expected%) × ln(actual% / expected%) over bands fixed on the training sample:
+10 train-decile score bands for the score, the scorecard's own bins (including the missing bin) for
+each feature (that is the CSI). An empty band is floored at 0.01 % so the log is defined. 0.10 /
+0.25 are industry conventions (no action / investigate / act), not statistical tests, and they get
+stricter with more bands and looser with small samples. A stable score with an unstable feature
+means the population moved on that feature while the score absorbed it: look at *which* bin moved.
+Here every alert sits in the Missing bin — six bureau fields were unpopulated for 5.8 % of training
+loans and for none in OOT — plus `term`, because the OOT window only contains 36-month loans
+(DECISIONS.md D5). Those are data-availability shifts, not borrower shifts: the score PSI stays at
+0.03, so keep monitoring; a redeployment would refit the missing bins or build a single-term card.
 
-*Where:* `scorecard/monitor.py` (Phase 2), report §6.
+*Where:* `scorecard/monitor.py` (`score_psi`, `feature_csi`), report §6.1–6.2.
+*Numbers:* score PSI train→test 0.0001, train→OOT 0.0271 (0.0316 with platform rating). CSI
+train→OOT: `term` 0.6447 (36-month share 90.69 % → 100 %), `num_tl_op_past_12m` 0.3851 and five
+more bureau fields 0.378–0.383 (Missing bin 5.84 % → 0.00 %); the other 13 features are below 0.10.
 
 ### 11. OOT vs a random hold-out; why split by time?
 
@@ -129,17 +160,30 @@ means. Time brings product-mix and macro drift, so OOT metrics are usually a bit
 honest number to quote. Here the last six issue months are OOT and everything before them is
 split stratified at random into train / test.
 
-*Where:* `scorecard/split.py`, report §1.8.
+*Where:* `scorecard/split.py`, report §1.8; vintage curves in §6.3.
 *Numbers:* test AUC 0.6744 vs OOT AUC 0.6750; OOT = 162,236 loans issued 2015-07 … 2015-12.
+Vintage curves: the 2012Q1 cohort reaches 5.67 % cumulative default at month 12, 15.22 % at month
+36 and 16.15 % at month 60; 2015Q4 reaches 5.48 % at month 12 and 14.71 % at month 36. Cohorts
+from 2014 on contain only 36-month loans (maturity rule, DECISIONS.md D5), so their curves flatten
+after month 36 while the 2012–2013 cohorts keep rising to month 60.
 
 ### 12. With vs without the platform rating — how big is the gap, and should it be used?
 
-*Phase 2* runs both variants side by side. Phase 1 deliberately excludes `grade`, `sub_grade`,
-`int_rate` and `installment`: they are the platform's own risk model, so a scorecard built on them
-mostly re-learns that model and cannot be used by a lender who does not have it. Whether to use it
-depends on who owns the decision: a platform may, a third party should not.
+Both variants run side by side (`features.use_platform_rating: [false, true]`). Without the rating
+the scorecard uses only application and bureau data; with it, `sub_grade` enters as the strongest
+variable (IV 0.3546, three times `fico_mid`) and `grade`, `int_rate` and `installment` are dropped
+by the correlation filter because they carry the same information. The gain is real but modest —
+about +0.023 AUC on OOT and 0.7 pp less bad rate at 70 % approval — because the platform grade is
+itself built from the bureau data the scorecard already sees, plus pricing. Whether to use it
+depends on who owns the decision: the platform can (it is their own model, and the combined card
+beats grade alone in the swap set), a third-party lender should not, because it would be modelling
+someone else's model and could not score an applicant without it.
 
-*Where:* `configs/lendingclub.yaml` → `features.use_platform_rating`, report §3.
+*Where:* `configs/lendingclub.yaml` → `features.use_platform_rating`, report §3 (both variants), §5.5.
+*Numbers:* LR AUC / KS test 0.6744 / 0.2513 → 0.6886 / 0.2760, OOT 0.6750 / 0.2526 → 0.6978 /
+0.2874; GBDT OOT AUC 0.6959 → 0.7095; 5-fold CV AUC 0.6719 ± 0.0026 → 0.6869 ± 0.0017. Approved
+bad rate at 70 % approval: test 10.63 % → 10.34 % (−0.29 pp), OOT 10.60 % → 9.91 % (−0.69 pp); at
+50 % approval on OOT 8.50 % → 7.65 % (−0.85 pp).
 
 ### 13. What changes for a new dataset?
 

@@ -55,11 +55,13 @@ SEGMENT_LABELS = {TRAIN: "train", TEST: "test", OOT: "OOT"}
 
 PCT_COLS = {"bad_rate", "share", "missing_rate", "approval_rate", "top_share", "overall", "cum_bad_share", "cum_good_share",
             "term_60_share", "max_bin_share", "missing_share", "largest_regular_bin_share", "cum_approval_rate", "cum_bad_rate",
-            "bad_rate_approved", "bad_rate_rejected", "expected_pct", "actual_pct"}
-F4_COLS = {"iv", "woe", "auc", "ks", "gini", "coefficient", "vif", "psi", "csi", "corr", "psi_contribution", "cv_auc_mean",
+            "bad_rate_approved", "bad_rate_rejected", "expected_pct", "actual_pct", "target_approval_rate", "marginal_bad_rate",
+            "model_bad_rate", "baseline_bad_rate", "swap_in_bad_rate", "swap_out_bad_rate", "cum_default_rate", "train_share", "shift_share"}
+F4_COLS = {"iv", "woe", "auc", "ks", "gini", "coefficient", "vif", "psi", "csi", "csi_test", "csi_oot", "corr", "psi_contribution", "cv_auc_mean",
            "cv_auc_std", "cv_ks_mean", "cv_ks_std", "factor", "offset"}
 INT_COLS = {"n", "count", "bad", "good", "removed", "remaining", "n_raw_rows", "n_rows", "n_unique", "n_bins", "n_bins_initial",
-            "points_int", "step", "bin_id", "band", "n_approved", "n_rejected", "cutoff_score", "score_min", "score_max"}
+            "points_int", "step", "bin_id", "band", "n_approved", "n_rejected", "cutoff_score", "score_min", "score_max", "cum_n",
+            "marginal_n", "swap_in_n", "swap_out_n", "n_expected", "n_actual", "mob"}
 
 
 # --------------------------------------------------------------------------- formatting
@@ -390,7 +392,7 @@ def build_section_3(result: RunResult, out_dir: Path, embed: bool) -> dict[str, 
             blocks.append(table_block(kst, title=f"{prefix}KS 分段表（test，按 LR 预测概率从高风险到低风险 10 等分）", rename={"band": "分段", "n": "人数", "bad": "bad 数", "bad_rate": "bad rate", "cum_bad_share": "累计 bad 占比", "cum_good_share": "累计 good 占比", "ks": "KS"}, collapsed=True))
     if len(result.variants) == 1:
         which = "含" if result.variants[0].use_platform_rating else "不含"
-        blocks.append(p(f"本次只跑“{which}平台评级”一套模型；“含 / 不含平台评级”并排对比需要 features.use_platform_rating: [false, true]（Phase 2 默认）。"))
+        blocks.append(p(f"本次只跑“{which}平台评级”一套模型；“含 / 不含平台评级”并排对比需要 features.use_platform_rating: [false, true]（configs/lendingclub.yaml 的默认）。"))
     intro = "WOE 逻辑回归评分卡与 GBDT challenger 在 train / test / OOT 上的 AUC、KS、Gini，以及 train 内交叉验证（每折重做分箱与 WOE；入模变量清单固定自全 train）。"
     return section(3, "模型表现", intro, blocks)
 

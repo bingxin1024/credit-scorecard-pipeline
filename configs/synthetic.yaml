@@ -11,6 +11,9 @@ dataset:
 sample:
   min_issue_date: null
 
+features:
+  use_platform_rating: [false, true]   # the synthetic frame has an ordered `grade`, so both variants run
+
 binning:
   sample_size: 20000
 

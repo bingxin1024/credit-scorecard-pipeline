@@ -453,6 +453,11 @@ class LendingClubAdapter(Adapter):
         out[ISSUE_DATE] = df["issue_d"]
         if "last_pymnt_d" in df:
             out[EVENT_DATE] = df["last_pymnt_d"]
+            notes["event_date_note"] = (
+                "Lending Club 没有逐月表现数据，vintage 的账龄用 last_pymnt_d − issue_d（月）近似违约发生月："
+                "最后一次还款之后约 120 天以上才被 Charged Off，所以曲线比真实违约时点早约 4–5 个月；"
+                "Fully Paid 贷款的 last_pymnt_d 是结清月，不参与分子。"
+            )
         if "funded_amnt" in df:
             out[LOAN_AMOUNT] = df["funded_amnt"].astype("float64")
         subtract_fee = bool(self.options.get("net_cash_subtract_collection_fee", True))

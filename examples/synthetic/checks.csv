@@ -1,0 +1,29 @@
+check,scope,threshold,value,status,detail
+样本 bad rate 在合理区间,数据,1%–40%,27.42%,pass,
+IV 过高（疑似 leakage）,不含平台评级,IV > 0.5,1 个特征,fail,已入模：fico_mid。清单：fico_mid 0.805。请核对这些字段是否为贷后信息
+入模特征单一分箱占比过高,不含平台评级,最大箱占比 > 90%,最大 74.7%（term）,pass,
+train–test KS 差（LR scorecard）,不含平台评级,KS(train) − KS(test) > 0.05,0.4025 − 0.4247 = -0.0221,pass,
+train–test KS 差（GBDT challenger）,不含平台评级,KS(train) − KS(test) > 0.05,0.4644 − 0.4313 = +0.0332,pass,
+test KS 高得不合理,不含平台评级,KS > 0.9,0.4247,pass,
+score PSI train → test,不含平台评级,PSI > 0.25,0.0032,pass,
+score PSI train → OOT,不含平台评级,PSI > 0.25,0.0033,pass,
+入模特征 CSI（train → OOT）,不含平台评级,CSI > 0.25,0 / 6 个特征,pass,
+入模特征缺失率过高,不含平台评级,train 缺失率 > 50%,最高 8.1%（revol_util）,pass,
+LR 系数符号（WOE 越大越安全，系数应为负）,不含平台评级,系数 > 0,0 / 6 个为正,pass,
+入模特征 VIF,不含平台评级,VIF > 5.0,最高 1.00（fico_mid）,pass,
+swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 平台评级）,不含平台评级,swap-in > swap-out,31.82% vs 40.91%,pass,
+IV 过高（疑似 leakage）,含平台评级,IV > 0.5,2 个特征,fail,"已入模：fico_mid, grade。清单：fico_mid 0.805, grade 0.699。请核对这些字段是否为贷后信息"
+入模特征单一分箱占比过高,含平台评级,最大箱占比 > 90%,最大 74.7%（term）,pass,
+train–test KS 差（LR scorecard）,含平台评级,KS(train) − KS(test) > 0.05,0.4071 − 0.4305 = -0.0234,pass,
+train–test KS 差（GBDT challenger）,含平台评级,KS(train) − KS(test) > 0.05,0.4696 − 0.4262 = +0.0434,pass,
+test KS 高得不合理,含平台评级,KS > 0.9,0.4305,pass,
+score PSI train → test,含平台评级,PSI > 0.25,0.0018,pass,
+score PSI train → OOT,含平台评级,PSI > 0.25,0.0026,pass,
+入模特征 CSI（train → OOT）,含平台评级,CSI > 0.25,0 / 7 个特征,pass,
+入模特征缺失率过高,含平台评级,train 缺失率 > 50%,最高 8.1%（revol_util）,pass,
+LR 系数符号（WOE 越大越安全，系数应为负）,含平台评级,系数 > 0,0 / 7 个为正,pass,
+入模特征 VIF,含平台评级,VIF > 5.0,最高 2.44（grade）,pass,
+swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 平台评级）,含平台评级,swap-in > swap-out,31.03% vs 42.67%,pass,
+建模警告,不含平台评级,—,—,info,fico_mid: IV = 0.805 > 0.5，疑似 leakage，已保留但需人工确认
+建模警告,含平台评级,—,—,info,fico_mid: IV = 0.805 > 0.5，疑似 leakage，已保留但需人工确认
+建模警告,含平台评级,—,—,info,grade: IV = 0.699 > 0.5，疑似 leakage，已保留但需人工确认

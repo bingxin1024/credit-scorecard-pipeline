@@ -1,0 +1,15 @@
+feature,kind,iv,missing_rate,n_bins,selected,step,reason,vif,leakage_suspect
+fico_mid,numeric,0.8051738972981752,0.0,6,True,,selected,1.001205419698411,True
+dti,numeric,0.06768503610283179,0.0,6,True,,selected,1.0003772739184316,False
+revol_util,numeric,0.047788987481634716,0.0811433447098976,5,True,,selected,1.0006733626826807,False
+term,numeric,0.03559861286108969,0.0,2,True,,selected,1.000287652131855,False
+inq_last_6mths,numeric,0.03356944472347584,0.0,3,True,,selected,1.0006331902904781,False
+delinq_2yrs,numeric,0.0265052181159422,0.0,2,True,,selected,1.0004917644940448,False
+mths_since_last_delinq,numeric,0.028405039156699334,0.7400170648464164,3,False,1_missing,missing rate 74.0% > 50%,,False
+credit_hist_months,numeric,0.011502166505883094,0.0,4,False,2_iv,IV 0.0115 < 0.02,,False
+home_ownership,categorical,0.009602942898124711,0.0,3,False,2_iv,IV 0.0096 < 0.02,,False
+noise_feature,numeric,0.0035486118786477684,0.0,4,False,2_iv,IV 0.0035 < 0.02,,False
+loan_amnt,numeric,0.002406964932447891,0.0,3,False,2_iv,IV 0.0024 < 0.02,,False
+annual_inc,numeric,0.0016250182432466375,0.0,3,False,2_iv,IV 0.0016 < 0.02,,False
+purpose,categorical,0.000704489494876151,0.0,5,False,2_iv,IV 0.0007 < 0.02,,False
+mostly_missing,numeric,2.7630140597065567e-06,0.9506825938566553,2,False,1_missing,missing rate 95.1% > 50%,,False

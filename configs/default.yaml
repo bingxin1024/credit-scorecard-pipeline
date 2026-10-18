@@ -11,7 +11,7 @@ split:
   random_state: 42
 
 features:
-  use_platform_rating: false  # Phase 1: only the model WITHOUT platform rating
+  use_platform_rating: false  # false | true | [false, true] (both variants side by side)
   exclude: []
 
 binning:
@@ -50,13 +50,16 @@ scorecard:
   base_odds: 20
 
 strategy:
-  approval_rates: [0.5, 0.6, 0.7, 0.8, 0.9]
-  score_bands: 10
+  approval_rates: [0.5, 0.6, 0.7, 0.8, 0.9]   # candidate cut-offs (score >= cut-off approves)
+  score_bands: 10                             # equal-frequency score bands in the band table
+  swap_set_approval_rate: 0.7                 # the candidate the 2x2 swap-set table is shown at
+  profit_min_approval_rate: 0.1               # profit-maximising cut-offs searched at >= this approval rate
 
 monitor:
-  psi_bins: 10
+  psi_bins: 10                                # score PSI bands = train deciles
   psi_warn: 0.10
   psi_alert: 0.25
+  vintage_max_mob: 60                         # months on book on the vintage curves
 
 checks:
   leakage_iv: 0.5

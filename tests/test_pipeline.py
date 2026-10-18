@@ -26,7 +26,7 @@ def test_end_to_end_synthetic(small_config):
     md = (out / "report.md").read_text(encoding="utf-8")
     for heading in ("1. 样本与数据概况", "2. 分箱与 IV", "3. 模型表现", "4. 评分卡", "5. 策略分析", "6. 稳定性", "7. 自动检查与风险提示"):
         assert heading in html and heading in md
-    assert html.count("（本阶段未实现）") >= 3  # sections 5-7 are visible placeholders in Phase 1
+    assert "（本阶段未实现）" not in html  # Phase 2: sections 5-7 are real
     assert "NaN" not in md and "nan" not in md.replace("nanoseconds", "")
     for name in ("results.json", "scorecard.csv", "iv_table.csv", "sample_definition.csv", "field_audit.csv", "scorecard_model.json", "run_meta.json"):
         assert (out / name).exists()

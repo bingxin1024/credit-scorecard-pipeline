@@ -8,7 +8,7 @@ renders a fixed-structure report:
 ```
 sample definition → data profiling → monotonic WOE binning → IV / correlation selection
 → logistic-regression scorecard + GBDT challenger → PDO scaling
-→ cut-off / swap set / profit (Phase 2) → PSI / CSI / vintage monitoring (Phase 2)
+→ cut-off / swap set / profit → PSI / CSI / vintage monitoring → automatic checks
 ```
 
 Primary dataset: Lending Club accepted loans 2007–2018Q4 (2.26 M raw loans, 151 columns).
@@ -38,7 +38,7 @@ Outputs land in `outputs/<dataset>/`: `report.html`, `report.md`, `figures/`, an
 behind the report as CSV / JSON (`scorecard.csv`, `scorecard_model.json`, `iv_table.csv`,
 `feature_selection.csv`, `model_metrics.csv`, `results.json`, `run_meta.json`, …).
 
-## What the Lending Club run produces (Phase 1)
+## What the Lending Club run produces
 
 Numbers below are copied from [`examples/lendingclub/report.md`](examples/lendingclub/report.md);
 the report header records the config hash, data file, row count, git commit and timestamp that
@@ -56,10 +56,16 @@ produced them.
 | GBDT challenger AUC — test / OOT | 0.6941 / 0.6959 |
 | 5-fold CV AUC (binning refitted per fold) | 0.6719 ± 0.0026 |
 | Scale | PDO 20, 600 points ↔ 20:1 good:bad odds; score range 485–640 |
-| Run time (full data, cached parse) | 1.3 min |
+| Scorecard with the platform rating (variant 2) AUC / KS — test / OOT | 0.6886 / 0.2760 and 0.6978 / 0.2874 |
+| 70 % approval cut-off (OOT) | score ≥ 560 approves 70.88 %, approved bad rate 10.60 % (14.71 % overall) |
+| Swap set vs platform grade at that cut-off (OOT) | swap-in bad rate 18.63 % vs swap-out 19.97 %; approved bad rate 10.60 % vs 10.85 % |
+| Score PSI train → test / train → OOT | 0.0001 / 0.0271 (stable); CSI > 0.25 on `term` and six bureau fields (missing-bin shift) |
+| Automatic checks | 21 pass / 4 warn / 0 fail / 1 info |
+| Run time (full data, both variants, cached parse) | 2.4 min |
 
 The scorecard deliberately excludes the platform's own rating (`grade`, `sub_grade`, `int_rate`,
-`installment`); Phase 2 adds the "with platform rating" variant side by side.
+`installment`); the "with platform rating" variant runs side by side (there `sub_grade` enters with
+IV 0.3546 and `grade` / `int_rate` / `installment` fall to the correlation filter).
 
 ## Report structure (fixed, 7 sections)
 
@@ -72,12 +78,17 @@ The scorecard deliberately excludes the platform's own rating (`grade`, `sub_gra
 3. **Model performance** — LR coefficients with VIF, train / test / OOT AUC-KS-Gini, LR vs GBDT
    challenger, 5-fold CV, ROC and KS curves.
 4. **Scorecard** — PDO scaling with the actual numbers, points table, score distributions.
-5. **Strategy analysis** — *Phase 2* (score bands, approval-rate vs bad-rate curve, cut-offs,
-   profit curve on realised cash flow, swap set vs the platform grade).
-6. **Stability** — *Phase 2* (score PSI, feature CSI, vintage curves).
-7. **Automatic checks** — *Phase 2* (leakage, degenerate bins, KS gap, PSI, missing-in-model).
+5. **Strategy analysis** — equal-frequency score bands, approval-rate vs bad-rate curve, candidate
+   cut-offs at 50–90 % approval with the marginal tranche, profit curve on realised net cash (total
+   and per loan), swap set vs the platform grade, both scorecard variants compared at equal approval.
+6. **Stability** — score PSI (train → test / OOT on train-decile bands), CSI of every scorecard
+   feature on its own bins with the bin that moved most, vintage curves by issue quarter.
+7. **Automatic checks** — leakage IV, degenerate bins, train–test KS gap, PSI / CSI, missing-in-model,
+   coefficient signs, VIF, swap-set sanity, plus every adapter warning; each row states what was
+   checked, the threshold, the value and a pass / warn / fail verdict.
 
-Sections not yet implemented render a visible "（本阶段未实现）" placeholder; they never disappear.
+A section whose module is switched off renders a visible "（本阶段未实现）" placeholder instead of
+disappearing; all seven are implemented.
 The report body is Chinese with English technical terms (WOE, IV, KS, PSI, cut-off, swap set …).
 
 ## Architecture
@@ -90,8 +101,9 @@ raw data ──adapter──▶ standard frame ──engine──▶ artifacts �
                                              ├─ select.py    missing, IV, correlation, sign, VIF
                                              ├─ model.py     WOE logistic regression + HistGradientBoosting
                                              ├─ scorecard.py PDO scaling, points table
-                                             ├─ strategy.py  cut-off / swap set / profit   (Phase 2)
-                                             └─ monitor.py   PSI / CSI / vintage           (Phase 2)
+                                             ├─ strategy.py  cut-off / swap set / profit
+                                             ├─ monitor.py   PSI / CSI / vintage
+                                             └─ checks.py    automatic checks (section 7)
 ```
 
 Hard rules the code follows (see `CLAUDE.md`): `data/raw/` is never committed; binning, WOE,
@@ -122,8 +134,9 @@ DECISIONS.md        decision log (Chinese)      FAQ.md   interview Q&A with the 
 
 ## Status
 
-- Phase 1 (this release): pipeline end to end, report sections 1–4, Lending Club adapter.
-- Phase 2: strategy + monitoring layers, section 7 checks, with/without platform-rating models.
+- Phase 1: pipeline end to end, report sections 1–4, Lending Club adapter.
+- Phase 2 (this release): strategy + monitoring layers, section 7 checks, with / without
+  platform-rating scorecards side by side.
 - Phase 3: `SKILL.md` for agents, UCI adapter, docs site, v1.0.
 
 License: MIT.

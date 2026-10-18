@@ -1,0 +1,5 @@
+variant,segment,n_expected,n_actual,psi,status
+no_platform_rating,test,11720,5023,0.00316409320978098,stable
+no_platform_rating,oot,11720,3257,0.0033437652740712304,stable
+with_platform_rating,test,11720,5023,0.001756908841705634,stable
+with_platform_rating,oot,11720,3257,0.0025788168915555623,stable

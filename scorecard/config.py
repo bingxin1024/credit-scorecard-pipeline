@@ -79,11 +79,14 @@ DEFAULTS: dict[str, Any] = {
     "strategy": {
         "approval_rates": [0.5, 0.6, 0.7, 0.8, 0.9],
         "score_bands": 10,
+        "swap_set_approval_rate": 0.7,  # the candidate cut-off the 2x2 swap-set table is shown at
+        "profit_min_approval_rate": 0.1,  # profit-maximising cut-offs are searched at or above this
     },
     "monitor": {
         "psi_bins": 10,
         "psi_warn": 0.10,
         "psi_alert": 0.25,
+        "vintage_max_mob": 60,  # months on book shown on the vintage curves
     },
     "checks": {
         "leakage_iv": 0.5,
@@ -205,6 +208,8 @@ class ScorecardConfig:
 class StrategyConfig:
     approval_rates: list[float]
     score_bands: int
+    swap_set_approval_rate: float = 0.7
+    profit_min_approval_rate: float = 0.1
 
 
 @dataclass
@@ -212,6 +217,7 @@ class MonitorConfig:
     psi_bins: int
     psi_warn: float
     psi_alert: float
+    vintage_max_mob: int = 60
 
 
 @dataclass

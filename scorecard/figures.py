@@ -161,3 +161,104 @@ def plot_iv_bars(iv_table: pd.DataFrame, path: Path, top: int = 30, min_iv: floa
     ax.legend(loc="lower right", fontsize=8)
     ax.tick_params(axis="y", labelsize=8)
     return save(fig, path)
+
+
+# --------------------------------------------------------------------------- Phase 2: strategy
+def plot_approval_curve(curves: dict[str, pd.DataFrame], cutoffs: dict[str, pd.DataFrame], path: Path, title: str) -> Path:
+    fig, ax = plt.subplots(figsize=(7.5, 4.3))
+    palette = [GOOD_COLOR, BAD_COLOR, ACCENT]
+    for i, (label, curve) in enumerate(curves.items()):
+        color = palette[i % len(palette)]
+        ax.plot(curve["approval_rate"], curve["bad_rate_approved"], color=color, label=f"{label}: bad rate of approved loans")
+        c = cutoffs.get(label)
+        if c is not None and len(c):
+            ax.scatter(c["approval_rate"], c["bad_rate_approved"], color=color, s=30, zorder=3)
+            if i == 0:
+                for row in c.itertuples(index=False):
+                    ax.annotate(f"cut-off {int(row.cutoff_score)}", (row.approval_rate, row.bad_rate_approved), textcoords="offset points",
+                                xytext=(6, -12), fontsize=8, color=INK["secondary"])
+        ax.axhline(float(curve["bad_rate_approved"].iloc[-1]), color=color, linestyle=":", linewidth=1, alpha=0.7)
+    ax.set_xlabel("Approval rate (share of loans with score >= cut-off)")
+    ax.set_ylabel("Bad rate of approved loans")
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax.set_xlim(0, 1)
+    ax.set_title(title)
+    ax.legend(loc="upper left", fontsize=8, title="dotted = approve everyone", title_fontsize=8)
+    return save(fig, path)
+
+
+def plot_profit_curve(curves: dict[str, pd.DataFrame], optima: dict[str, dict], path: Path, title: str) -> Path:
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
+    palette = [GOOD_COLOR, BAD_COLOR, ACCENT]
+    for i, (label, curve) in enumerate(curves.items()):
+        color = palette[i % len(palette)]
+        ax1.plot(curve["approval_rate"], curve["net_cash_total"] / 1e6, color=color, label=label)
+        ax2.plot(curve["approval_rate"], curve["net_cash_per_loan"], color=color, label=label)
+        best = optima.get(label)
+        if best:
+            bt, bl = best["best_total"], best["best_per_loan"]
+            ax1.scatter([bt["approval_rate"]], [bt["net_cash_total"] / 1e6], color=color, s=40, zorder=3)
+            ax1.annotate(f"max: cut-off {int(bt['cutoff_score'])} @ {bt['approval_rate']:.0%}", (bt["approval_rate"], bt["net_cash_total"] / 1e6),
+                         textcoords="offset points", xytext=(-6, 8 + 12 * i), fontsize=8, color=color, ha="right")
+            ax2.scatter([bl["approval_rate"]], [bl["net_cash_per_loan"]], color=color, s=40, zorder=3)
+            ax2.annotate(f"max: cut-off {int(bl['cutoff_score'])} @ {bl['approval_rate']:.0%}", (bl["approval_rate"], bl["net_cash_per_loan"]),
+                         textcoords="offset points", xytext=(8, 10 - 24 * i), fontsize=8, color=color)
+    for ax, ylabel in ((ax1, "Total net cash of approved loans (millions)"), (ax2, "Net cash per approved loan")):
+        ax.set_xlabel("Approval rate")
+        ax.set_ylabel(ylabel)
+        ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+        ax.set_xlim(0, 1)
+        ax.axhline(0, color=INK["axis"], linewidth=0.8)
+        ax.legend(loc="lower right", fontsize=8)
+    ax1.set_title(title)
+    ax2.set_title("Per-loan view (searched at approval rate >= min)")
+    return save(fig, path)
+
+
+# --------------------------------------------------------------------------- Phase 2: monitoring
+def plot_psi_bands(wide: pd.DataFrame, segments: list[str], path: Path, title: str) -> Path:
+    labels = {"test": "test", "oot": "OOT"}
+    series = [("train", "train", INK["axis"])] + [(seg, labels.get(seg, seg), [GOOD_COLOR, BAD_COLOR][i % 2]) for i, seg in enumerate(segments)]
+    x = np.arange(len(wide))
+    width = 0.8 / len(series)
+    fig, ax = plt.subplots(figsize=(8.5, 3.8))
+    for j, (col, label, color) in enumerate(series):
+        ax.bar(x + (j - (len(series) - 1) / 2) * width, wide[col], width=width, color=color, label=label)
+    ax.set_xticks(x)
+    ax.set_xticklabels(wide["interval"], rotation=30, ha="right", fontsize=8)
+    ax.set_ylabel("Share of loans")
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax.set_xlabel("Score band (train deciles, low to high)")
+    ax.set_title(title)
+    ax.legend(loc="upper right", fontsize=8)
+    return save(fig, path)
+
+
+def plot_csi_bars(csi: pd.DataFrame, key: str, path: Path, title: str, warn: float, alert: float) -> Path:
+    table = csi.sort_values(key).reset_index(drop=True)
+    colors = [BAD_COLOR if v >= alert else ("#f0b429" if v >= warn else ACCENT) for v in table[key]]
+    fig, ax = plt.subplots(figsize=(8, max(3.2, 0.3 * len(table) + 1)))
+    ax.barh(table["feature"], table[key], color=colors)
+    ax.axvline(warn, color=INK["muted"], linestyle="--", linewidth=1, label=f"warn {warn}")
+    ax.axvline(alert, color=BAD_COLOR, linestyle="--", linewidth=1, label=f"alert {alert}")
+    ax.set_xlabel("CSI (PSI of the scorecard-bin distribution)")
+    ax.set_title(title)
+    ax.legend(loc="lower right", fontsize=8)
+    ax.tick_params(axis="y", labelsize=8)
+    return save(fig, path)
+
+
+def plot_vintage(wide: pd.DataFrame, path: Path, title: str) -> Path:
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    cmap = plt.get_cmap("viridis")
+    n = len(wide)
+    for i, (cohort, row) in enumerate(wide.iterrows()):
+        ax.plot(np.asarray(row.index, dtype=float), row.to_numpy(dtype=float), color=cmap(i / max(n - 1, 1)), linewidth=1.4, label=str(cohort))
+    ax.set_xlabel("Months on book (event month - issue month)")
+    ax.set_ylabel("Cumulative default rate")
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax.set_xlim(0, float(wide.columns.max()))
+    ax.set_title(title)
+    ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=7, ncol=1 if n <= 14 else 2, title="issue quarter", title_fontsize=8)
+    return save(fig, path)

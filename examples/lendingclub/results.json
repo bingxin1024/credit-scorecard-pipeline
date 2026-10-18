@@ -1,5 +1,5 @@
 {
-  "config_hash": "ca81f62454d0",
+  "config_hash": "c5a5c873cbd5",
   "n_rows": 633767,
   "bad_rate": 0.14850094750910034,
   "split": [
@@ -169,9 +169,1474 @@
         "min_score": 485,
         "max_score": 640
       }
+    },
+    "with_platform_rating": {
+      "n_candidate_features": 103,
+      "n_selected": 20,
+      "selected": [
+        "sub_grade",
+        "fico_mid",
+        "loan_to_inc",
+        "term",
+        "acc_open_past_24mths",
+        "bc_open_to_buy",
+        "log_annual_inc",
+        "tot_hi_cred_lim",
+        "num_tl_op_past_12m",
+        "dti",
+        "total_rev_hi_lim",
+        "mo_sin_rcnt_tl",
+        "percent_bc_gt_75",
+        "inq_last_6mths",
+        "mort_acc",
+        "verification_status",
+        "mths_since_recent_bc",
+        "home_ownership",
+        "mo_sin_old_rev_tl_op",
+        "num_rev_tl_bal_gt_0"
+      ],
+      "metrics": [
+        {
+          "model": "LR scorecard",
+          "segment": "train",
+          "n": 330071,
+          "bad_rate": 0.14898612722717233,
+          "auc": 0.6881214764863316,
+          "ks": 0.2729378918560685,
+          "gini": 0.3762429529726632
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "train",
+          "n": 330071,
+          "bad_rate": 0.14898612722717233,
+          "auc": 0.70835832122087,
+          "ks": 0.3015005690330519,
+          "gini": 0.4167166424417399
+        },
+        {
+          "model": "LR scorecard",
+          "segment": "test",
+          "n": 141460,
+          "bad_rate": 0.1489891135303266,
+          "auc": 0.6885696679006378,
+          "ks": 0.27598945032125455,
+          "gini": 0.37713933580127557
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "test",
+          "n": 141460,
+          "bad_rate": 0.1489891135303266,
+          "auc": 0.6992322738931502,
+          "ks": 0.2920448406435523,
+          "gini": 0.39846454778630047
+        },
+        {
+          "model": "LR scorecard",
+          "segment": "oot",
+          "n": 162236,
+          "bad_rate": 0.14708819250967725,
+          "auc": 0.6978225925478634,
+          "ks": 0.2874154046353661,
+          "gini": 0.39564518509572677
+        },
+        {
+          "model": "GBDT challenger",
+          "segment": "oot",
+          "n": 162236,
+          "bad_rate": 0.14708819250967725,
+          "auc": 0.7094845799760274,
+          "ks": 0.3052088548971438,
+          "gini": 0.41896915995205486
+        }
+      ],
+      "cv": {
+        "lr": {
+          "cv_auc_mean": 0.6869325775212752,
+          "cv_auc_std": 0.001700010896521373,
+          "cv_ks_mean": 0.2726281874075153,
+          "cv_ks_std": 0.001975323124247335,
+          "cv_auc_folds": [
+            0.6863903145714569,
+            0.6870029275748184,
+            0.6893700199864995,
+            0.6872514215378429,
+            0.6846482039357584
+          ],
+          "cv_ks_folds": [
+            0.2714289585500469,
+            0.27261636363098335,
+            0.2754491347211908,
+            0.27339099195176414,
+            0.27025548818359146
+          ]
+        },
+        "gbdt": {
+          "cv_auc_mean": 0.6973194713017739,
+          "cv_auc_std": 0.0018475547603063061,
+          "cv_ks_mean": 0.28764191050253185,
+          "cv_ks_std": 0.0029848655301566184,
+          "cv_auc_folds": [
+            0.6987720313419544,
+            0.6965709405895038,
+            0.6990011202571473,
+            0.697756038774057,
+            0.6944972255462067
+          ],
+          "cv_ks_folds": [
+            0.2904693615678769,
+            0.2862503907434451,
+            0.28833623746407294,
+            0.28996468574245476,
+            0.2831888769948096
+          ]
+        }
+      },
+      "score_auc": {
+        "train": 0.687820468454106,
+        "test": 0.6882395444781041,
+        "oot": 0.6969439255333023
+      },
+      "scaling": {
+        "pdo": 20.0,
+        "base_score": 600.0,
+        "base_odds": 20.0,
+        "factor": 28.85390081777927,
+        "offset": 513.5614381022527,
+        "intercept": -1.7459693952021103,
+        "base_points": 563.9394658622925,
+        "base_points_int": 564,
+        "min_score": 498,
+        "max_score": 639
+      }
     }
   },
   "warnings": [
     "到期规则使不同期限的完整放款窗口不同（36 期贷款 issue_d <= 2015-12，60 期贷款 issue_d <= 2013-12）：最后几个月只有短期限贷款，train 与 OOT 的 term 构成不同（DECISIONS.md D5；可用 terms_allowed 只建单一期限的卡）"
-  ]
+  ],
+  "strategy": {
+    "has_net_cash": true,
+    "n_net_cash_missing": 0,
+    "net_cash_definition": "net_cash = total_pymnt - collection_recovery_fee - funded_amnt（实际回款减放款本金；仅策略层使用）",
+    "baseline": {
+      "kind": "platform_grade",
+      "column": "grade"
+    },
+    "approval_rates": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "swap_set_approval_rate": 0.7,
+    "profit_min_approval_rate": 0.1,
+    "segments": [
+      "test",
+      "oot"
+    ],
+    "variants": {
+      "no_platform_rating": {
+        "test": {
+          "n": 141460,
+          "bad_rate": 0.1489891135303266,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 567.0,
+              "approval_rate": 0.5045030397285452,
+              "n_approved": 71367.0,
+              "bad_rate_approved": 0.08653859626998472,
+              "bad_rate_rejected": 0.2125747221548514,
+              "marginal_n": 71367,
+              "marginal_bad_rate": 0.08653859626998472,
+              "bad_approved": 6176.0,
+              "n_rejected": 70093.0,
+              "net_cash_total": 98799978.76110868,
+              "net_cash_per_loan": 1384.3930494641597,
+              "marginal_net_cash_per_loan": 1384.3930494641597
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 563.0,
+              "approval_rate": 0.5916937650219143,
+              "n_approved": 83701.0,
+              "bad_rate_approved": 0.09576946511989104,
+              "bad_rate_rejected": 0.22611194792153605,
+              "marginal_n": 12334,
+              "marginal_bad_rate": 0.14918112534457598,
+              "bad_approved": 8016.0,
+              "n_rejected": 57759.0,
+              "net_cash_total": 114505209.2856369,
+              "net_cash_per_loan": 1368.0267772862558,
+              "marginal_net_cash_per_loan": 1273.3282410027746
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 558.0,
+              "approval_rate": 0.6954545454545454,
+              "n_approved": 98379.0,
+              "bad_rate_approved": 0.10631333922890047,
+              "bad_rate_rejected": 0.24644274738283697,
+              "marginal_n": 14678,
+              "marginal_bad_rate": 0.1664395694236272,
+              "bad_approved": 10459.0,
+              "n_rejected": 43081.0,
+              "net_cash_total": 132613686.92804624,
+              "net_cash_per_loan": 1347.9877507196277,
+              "marginal_net_cash_per_loan": 1233.71560446991
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 552.0,
+              "approval_rate": 0.8025590272868656,
+              "n_approved": 113530.0,
+              "bad_rate_approved": 0.1180745177486127,
+              "bad_rate_rejected": 0.2746509129967777,
+              "marginal_n": 15151,
+              "marginal_bad_rate": 0.19444261104877567,
+              "bad_approved": 13405.0,
+              "n_rejected": 27930.0,
+              "net_cash_total": 151990166.00705975,
+              "net_cash_per_loan": 1338.7665463495089,
+              "marginal_net_cash_per_loan": 1278.891101512343
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 544.0,
+              "approval_rate": 0.9042485508270889,
+              "n_approved": 127915.0,
+              "bad_rate_approved": 0.13138412226869406,
+              "bad_rate_rejected": 0.3152454780361757,
+              "marginal_n": 14385,
+              "marginal_bad_rate": 0.23642683350712548,
+              "bad_approved": 16806.0,
+              "n_rejected": 13545.0,
+              "net_cash_total": 170983969.05869067,
+              "net_cash_per_loan": 1336.6999105553741,
+              "marginal_net_cash_per_loan": 1320.3895065436855
+            }
+          ],
+          "profit": [
+            {
+              "criterion": "总净现金最大",
+              "cutoff_score": 499.0,
+              "n_approved": 141460.0,
+              "approval_rate": 1.0,
+              "bad_rate_approved": 0.1489891135303266,
+              "net_cash_total": 193930238.98043707,
+              "net_cash_per_loan": 1370.91926325772
+            },
+            {
+              "criterion": "每笔净现金最大",
+              "cutoff_score": 584.0,
+              "n_approved": 27947.0,
+              "approval_rate": 0.19756114802771102,
+              "bad_rate_approved": 0.05374458797008624,
+              "net_cash_total": 39655053.188449435,
+              "net_cash_per_loan": 1418.9377460353323
+            },
+            {
+              "criterion": "全部通过（参照）",
+              "cutoff_score": 499.0,
+              "n_approved": 141460.0,
+              "approval_rate": 1.0,
+              "bad_rate_approved": 0.1489891135303266,
+              "net_cash_total": 193930238.98043707,
+              "net_cash_per_loan": 1370.91926325772
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 558.0,
+            "n_approved": 98379,
+            "approval_rate": 0.6954545454545454,
+            "model_bad_rate": 0.10631333922890047,
+            "baseline_bad_rate": 0.11163967919982923,
+            "swap_in_n": 18822,
+            "swap_in_bad_rate": 0.17378599511210285,
+            "swap_out_n": 18822,
+            "swap_out_bad_rate": 0.20162575709276379,
+            "model_net_cash": 132613686.92804623,
+            "baseline_net_cash": 123338806.98056665,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 79557,
+                "share": 0.5623992648098403,
+                "bad": 7188,
+                "bad_rate": 0.09035031486858479,
+                "net_cash_total": 102921918.56574927,
+                "net_cash_per_loan": 1293.6877781433345
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 18822,
+                "share": 0.1330552806447052,
+                "bad": 3271,
+                "bad_rate": 0.17378599511210285,
+                "net_cash_total": 29691768.362296943,
+                "net_cash_per_loan": 1577.5033663955446
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 18822,
+                "share": 0.1330552806447052,
+                "bad": 3795,
+                "bad_rate": 0.20162575709276379,
+                "net_cash_total": 20416888.414817385,
+                "net_cash_per_loan": 1084.7353317828808
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 24259,
+                "share": 0.17149017390074933,
+                "bad": 6822,
+                "bad_rate": 0.28121521909394454,
+                "net_cash_total": 40899663.63757338,
+                "net_cash_per_loan": 1685.9583510273867
+              }
+            ]
+          }
+        },
+        "oot": {
+          "n": 162236,
+          "bad_rate": 0.14708819250967725,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 570.0,
+              "approval_rate": 0.5005794028452378,
+              "n_approved": 81212.0,
+              "bad_rate_approved": 0.08503669408461803,
+              "bad_rate_rejected": 0.2092836690363349,
+              "marginal_n": 81212,
+              "marginal_bad_rate": 0.08503669408461803,
+              "bad_approved": 6906.0,
+              "n_rejected": 81024.0,
+              "net_cash_total": 86416718.36725456,
+              "net_cash_per_loan": 1064.0880456983518,
+              "marginal_net_cash_per_loan": 1064.0880456983518
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 565.0,
+              "approval_rate": 0.6058088217165117,
+              "n_approved": 98284.0,
+              "bad_rate_approved": 0.09545806031500549,
+              "bad_rate_rejected": 0.22643545158869152,
+              "marginal_n": 17072,
+              "marginal_bad_rate": 0.1450328022492971,
+              "bad_approved": 9382.0,
+              "n_rejected": 63952.0,
+              "net_cash_total": 99983966.8229845,
+              "net_cash_per_loan": 1017.2964757537799,
+              "marginal_net_cash_per_loan": 794.7076180722789
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 560.0,
+              "approval_rate": 0.7087637762272245,
+              "n_approved": 114987.0,
+              "bad_rate_approved": 0.10599459069286093,
+              "bad_rate_rejected": 0.24709517661749456,
+              "marginal_n": 16703,
+              "marginal_bad_rate": 0.16799377357360953,
+              "bad_approved": 12188.0,
+              "n_rejected": 47249.0,
+              "net_cash_total": 111763192.21893989,
+              "net_cash_per_loan": 971.9637195416864,
+              "marginal_net_cash_per_loan": 705.2161525447755
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 555.0,
+              "approval_rate": 0.8002108040139057,
+              "n_approved": 129823.0,
+              "bad_rate_approved": 0.11653559076588894,
+              "bad_rate_rejected": 0.26945978465430537,
+              "marginal_n": 14836,
+              "marginal_bad_rate": 0.19823402534375842,
+              "bad_approved": 15129.0,
+              "n_rejected": 32413.0,
+              "net_cash_total": 120373019.82711464,
+              "net_cash_per_loan": 927.2087367193382,
+              "marginal_net_cash_per_loan": 580.3334866658638
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 548.0,
+              "approval_rate": 0.8993195098498483,
+              "n_approved": 145902.0,
+              "bad_rate_approved": 0.1293813655741525,
+              "bad_rate_rejected": 0.3052528468225787,
+              "marginal_n": 16079,
+              "marginal_bad_rate": 0.23309907332545557,
+              "bad_approved": 18877.0,
+              "n_rejected": 16334.0,
+              "net_cash_total": 126999861.56465742,
+              "net_cash_per_loan": 870.4463377106374,
+              "marginal_net_cash_per_loan": 412.1426542411082
+            }
+          ],
+          "profit": [
+            {
+              "criterion": "总净现金最大",
+              "cutoff_score": 535.0,
+              "n_approved": 159964.0,
+              "approval_rate": 0.9859957099534012,
+              "bad_rate_approved": 0.14347603210722412,
+              "net_cash_total": 129027554.44244531,
+              "net_cash_per_loan": 806.6037010980302
+            },
+            {
+              "criterion": "每笔净现金最大",
+              "cutoff_score": 596.0,
+              "n_approved": 17425.0,
+              "approval_rate": 0.10740526147094356,
+              "bad_rate_approved": 0.03678622668579627,
+              "net_cash_total": 21593049.27732954,
+              "net_cash_per_loan": 1239.199384638711
+            },
+            {
+              "criterion": "全部通过（参照）",
+              "cutoff_score": 512.0,
+              "n_approved": 162236.0,
+              "approval_rate": 1.0,
+              "bad_rate_approved": 0.14708819250967725,
+              "net_cash_total": 128191611.535383,
+              "net_cash_per_loan": 790.1551538214885
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 560.0,
+            "n_approved": 114987,
+            "approval_rate": 0.7087637762272245,
+            "model_bad_rate": 0.10599459069286093,
+            "baseline_bad_rate": 0.10852531155695862,
+            "swap_in_n": 21643,
+            "swap_in_bad_rate": 0.18629580002772259,
+            "swap_out_n": 21643,
+            "swap_out_bad_rate": 0.19974125583329483,
+            "model_net_cash": 111763192.21893987,
+            "baseline_net_cash": 102837845.05089656,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 93344,
+                "share": 0.5753593530412485,
+                "bad": 8156,
+                "bad_rate": 0.08737572848817278,
+                "net_cash_total": 92573520.32846242,
+                "net_cash_per_loan": 991.7458039987832
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 21643,
+                "share": 0.13340442318597598,
+                "bad": 4032,
+                "bad_rate": 0.18629580002772259,
+                "net_cash_total": 19189671.89047745,
+                "net_cash_per_loan": 886.6456540441459
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 21643,
+                "share": 0.13340442318597598,
+                "bad": 4323,
+                "bad_rate": 0.19974125583329483,
+                "net_cash_total": 10264324.722434144,
+                "net_cash_per_loan": 474.2560976959823
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 25606,
+                "share": 0.15783180058679946,
+                "bad": 7352,
+                "bad_rate": 0.2871202062016715,
+                "net_cash_total": 6164094.594009035,
+                "net_cash_per_loan": 240.72852433058796
+              }
+            ]
+          }
+        }
+      },
+      "with_platform_rating": {
+        "test": {
+          "n": 141460,
+          "bad_rate": 0.1489891135303266,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 568.0,
+              "approval_rate": 0.5054290965643998,
+              "n_approved": 71498.0,
+              "bad_rate_approved": 0.08106520462110828,
+              "bad_rate_rejected": 0.2184042766073011,
+              "marginal_n": 71498,
+              "marginal_bad_rate": 0.08106520462110828,
+              "bad_approved": 5796.0,
+              "n_rejected": 69962.0,
+              "net_cash_total": 93736139.17272674,
+              "net_cash_per_loan": 1311.0316256780152,
+              "marginal_net_cash_per_loan": 1311.0316256780152
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 563.0,
+              "approval_rate": 0.5981054715113813,
+              "n_approved": 84608.0,
+              "bad_rate_approved": 0.09103158093797277,
+              "bad_rate_rejected": 0.235242383733202,
+              "marginal_n": 13110,
+              "marginal_bad_rate": 0.14538520213577422,
+              "bad_approved": 7702.0,
+              "n_rejected": 56852.0,
+              "net_cash_total": 111760962.91829187,
+              "net_cash_per_loan": 1320.926660815666,
+              "marginal_net_cash_per_loan": 1374.8912086624814
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 557.0,
+              "approval_rate": 0.7074155238229888,
+              "n_approved": 100071.0,
+              "bad_rate_approved": 0.10344655294740734,
+              "bad_rate_rejected": 0.2591026601270869,
+              "marginal_n": 15463,
+              "marginal_bad_rate": 0.17137683502554485,
+              "bad_approved": 10352.0,
+              "n_rejected": 41389.0,
+              "net_cash_total": 132425916.25516087,
+              "net_cash_per_loan": 1323.3196056316103,
+              "marginal_net_cash_per_loan": 1336.412942952144
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 551.0,
+              "approval_rate": 0.8037961261133889,
+              "n_approved": 113705.0,
+              "bad_rate_approved": 0.11614264983949694,
+              "bad_rate_rejected": 0.2835525130607098,
+              "marginal_n": 13634,
+              "marginal_bad_rate": 0.2093296171336365,
+              "bad_approved": 13206.0,
+              "n_rejected": 27755.0,
+              "net_cash_total": 149809087.45152557,
+              "net_cash_per_loan": 1317.5241849657057,
+              "marginal_net_cash_per_loan": 1274.9868854602246
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 543.0,
+              "approval_rate": 0.9016259013148593,
+              "n_approved": 127544.0,
+              "bad_rate_approved": 0.12979050366932196,
+              "bad_rate_rejected": 0.32494969818913483,
+              "marginal_n": 13839,
+              "marginal_bad_rate": 0.24192499458053326,
+              "bad_approved": 16554.0,
+              "n_rejected": 13916.0,
+              "net_cash_total": 169726468.10958615,
+              "net_cash_per_loan": 1330.7287532897365,
+              "marginal_net_cash_per_loan": 1439.2210895339679
+            }
+          ],
+          "profit": [
+            {
+              "criterion": "总净现金最大",
+              "cutoff_score": 508.0,
+              "n_approved": 141458.0,
+              "approval_rate": 0.9999858617276969,
+              "bad_rate_approved": 0.1489841507726675,
+              "net_cash_total": 193938771.20583192,
+              "net_cash_per_loan": 1370.998962277368
+            },
+            {
+              "criterion": "每笔净现金最大",
+              "cutoff_score": 508.0,
+              "n_approved": 141458.0,
+              "approval_rate": 0.9999858617276969,
+              "bad_rate_approved": 0.1489841507726675,
+              "net_cash_total": 193938771.20583192,
+              "net_cash_per_loan": 1370.998962277368
+            },
+            {
+              "criterion": "全部通过（参照）",
+              "cutoff_score": 505.0,
+              "n_approved": 141460.0,
+              "approval_rate": 1.0,
+              "bad_rate_approved": 0.1489891135303266,
+              "net_cash_total": 193930238.98043695,
+              "net_cash_per_loan": 1370.9192632577192
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 557.0,
+            "n_approved": 100071,
+            "approval_rate": 0.7074155238229888,
+            "model_bad_rate": 0.10344655294740734,
+            "baseline_bad_rate": 0.11302974887829641,
+            "swap_in_n": 13261,
+            "swap_in_bad_rate": 0.15752959806952718,
+            "swap_out_n": 13261,
+            "swap_out_bad_rate": 0.22984691953849634,
+            "model_net_cash": 132425916.25516088,
+            "baseline_net_cash": 125531940.285815,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 86810,
+                "share": 0.6136717093171214,
+                "bad": 8263,
+                "bad_rate": 0.09518488653380947,
+                "net_cash_total": 110511752.57668723,
+                "net_cash_per_loan": 1273.0302105366575
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 13261,
+                "share": 0.09374381450586738,
+                "bad": 2089,
+                "bad_rate": 0.15752959806952718,
+                "net_cash_total": 21914163.678473663,
+                "net_cash_per_loan": 1652.5272361415928
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 13261,
+                "share": 0.09374381450586738,
+                "bad": 3048,
+                "bad_rate": 0.22984691953849634,
+                "net_cash_total": 15020187.709127778,
+                "net_cash_per_loan": 1132.6587519137154
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 28128,
+                "share": 0.19884066167114378,
+                "bad": 7676,
+                "bad_rate": 0.2728953356086462,
+                "net_cash_total": 46484135.01614831,
+                "net_cash_per_loan": 1652.5929684353066
+              }
+            ]
+          }
+        },
+        "oot": {
+          "n": 162236,
+          "bad_rate": 0.14708819250967725,
+          "cutoffs": [
+            {
+              "target_approval_rate": 0.5,
+              "cutoff_score": 572.0,
+              "approval_rate": 0.49919869819275625,
+              "n_approved": 80988.0,
+              "bad_rate_approved": 0.07652985627500371,
+              "bad_rate_rejected": 0.21742073651043717,
+              "marginal_n": 80988,
+              "marginal_bad_rate": 0.07652985627500371,
+              "bad_approved": 6198.0,
+              "n_rejected": 81248.0,
+              "net_cash_total": 83237563.19836086,
+              "net_cash_per_loan": 1027.7765002020158,
+              "marginal_net_cash_per_loan": 1027.7765002020158
+            },
+            {
+              "target_approval_rate": 0.6,
+              "cutoff_score": 566.0,
+              "approval_rate": 0.607750437634064,
+              "n_approved": 98599.0,
+              "bad_rate_approved": 0.08811448391971521,
+              "bad_rate_rejected": 0.23846190109527476,
+              "marginal_n": 17611,
+              "marginal_bad_rate": 0.14138890466185908,
+              "bad_approved": 8688.0,
+              "n_rejected": 63637.0,
+              "net_cash_total": 98554427.12566413,
+              "net_cash_per_loan": 999.547937866146,
+              "marginal_net_cash_per_loan": 869.7327765205423
+            },
+            {
+              "target_approval_rate": 0.7,
+              "cutoff_score": 561.0,
+              "approval_rate": 0.6975455509258118,
+              "n_approved": 113167.0,
+              "bad_rate_approved": 0.09908365512914542,
+              "bad_rate_rejected": 0.2578002404776947,
+              "marginal_n": 14568,
+              "marginal_bad_rate": 0.17332509610104338,
+              "bad_approved": 11213.0,
+              "n_rejected": 49069.0,
+              "net_cash_total": 109275648.80806512,
+              "net_cash_per_loan": 965.6140819149144,
+              "marginal_net_cash_per_loan": 735.9432785832638
+            },
+            {
+              "target_approval_rate": 0.8,
+              "cutoff_score": 555.0,
+              "approval_rate": 0.7985280702186938,
+              "n_approved": 129550.0,
+              "bad_rate_approved": 0.11194905441914318,
+              "bad_rate_rejected": 0.28636113320687756,
+              "marginal_n": 16383,
+              "marginal_bad_rate": 0.200817921015687,
+              "bad_approved": 14503.0,
+              "n_rejected": 32686.0,
+              "net_cash_total": 120482912.4970019,
+              "net_cash_per_loan": 930.0109031030637,
+              "marginal_net_cash_per_loan": 684.0788432482931
+            },
+            {
+              "target_approval_rate": 0.9,
+              "cutoff_score": 547.0,
+              "approval_rate": 0.9020192805542543,
+              "n_approved": 146340.0,
+              "bad_rate_approved": 0.12721743884105507,
+              "bad_rate_rejected": 0.33002013085052845,
+              "marginal_n": 16790,
+              "marginal_bad_rate": 0.24502680166765933,
+              "bad_approved": 18617.0,
+              "n_rejected": 15896.0,
+              "net_cash_total": 127391514.21222825,
+              "net_cash_per_loan": 870.5173856240826,
+              "marginal_net_cash_per_loan": 411.4712159158042
+            }
+          ],
+          "profit": [
+            {
+              "criterion": "总净现金最大",
+              "cutoff_score": 533.0,
+              "n_approved": 160027.0,
+              "approval_rate": 0.9863840331369117,
+              "bad_rate_approved": 0.14322583064107933,
+              "net_cash_total": 129223126.23409446,
+              "net_cash_per_loan": 807.5082719422
+            },
+            {
+              "criterion": "每笔净现金最大",
+              "cutoff_score": 603.0,
+              "n_approved": 16583.0,
+              "approval_rate": 0.10221529130402623,
+              "bad_rate_approved": 0.030332267985286137,
+              "net_cash_total": 18520351.13758371,
+              "net_cash_per_loan": 1116.8275425184654
+            },
+            {
+              "criterion": "全部通过（参照）",
+              "cutoff_score": 513.0,
+              "n_approved": 162236.0,
+              "approval_rate": 1.0,
+              "bad_rate_approved": 0.14708819250967725,
+              "net_cash_total": 128191611.53538297,
+              "net_cash_per_loan": 790.1551538214883
+            }
+          ],
+          "swap_set": {
+            "cutoff_score": 561.0,
+            "n_approved": 113167,
+            "approval_rate": 0.6975455509258118,
+            "model_bad_rate": 0.09908365512914542,
+            "baseline_bad_rate": 0.10701883057781862,
+            "swap_in_n": 15374,
+            "swap_in_bad_rate": 0.16248211265773382,
+            "swap_out_n": 15374,
+            "swap_out_bad_rate": 0.22089241576687915,
+            "model_net_cash": 109275648.80806518,
+            "baseline_net_cash": 101548831.0064595,
+            "target_approval_rate": 0.7,
+            "cells": [
+              {
+                "cell": "both_approve",
+                "label": "双批（模型批、基准批）",
+                "n": 97793,
+                "share": 0.6027823664291526,
+                "bad": 8715,
+                "bad_rate": 0.08911680795148937,
+                "net_cash_total": 94141159.96982802,
+                "net_cash_per_loan": 962.6574496111995
+              },
+              {
+                "cell": "swap_in",
+                "label": "swap-in（模型批、基准拒）",
+                "n": 15374,
+                "share": 0.09476318449665919,
+                "bad": 2498,
+                "bad_rate": 0.16248211265773382,
+                "net_cash_total": 15134488.838237163,
+                "net_cash_per_loan": 984.4210249926605
+              },
+              {
+                "cell": "swap_out",
+                "label": "swap-out（模型拒、基准批）",
+                "n": 15374,
+                "share": 0.09476318449665919,
+                "bad": 3396,
+                "bad_rate": 0.22089241576687915,
+                "net_cash_total": 7407671.036631471,
+                "net_cash_per_loan": 481.8310808268161
+              },
+              {
+                "cell": "both_reject",
+                "label": "双拒（模型拒、基准拒）",
+                "n": 33695,
+                "share": 0.20769126457752904,
+                "bad": 9254,
+                "bad_rate": 0.2746401543255676,
+                "net_cash_total": 11508291.69068639,
+                "net_cash_per_loan": 341.5430090721588
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "monitor": {
+    "thresholds": {
+      "warn": 0.1,
+      "alert": 0.25
+    },
+    "psi_bins": 10,
+    "variants": {
+      "no_platform_rating": {
+        "score_psi": [
+          {
+            "segment": "test",
+            "n_expected": 330071,
+            "n_actual": 141460,
+            "psi": 9.557217150153937e-05,
+            "status": "stable"
+          },
+          {
+            "segment": "oot",
+            "n_expected": 330071,
+            "n_actual": 162236,
+            "psi": 0.027144658266196383,
+            "status": "stable"
+          }
+        ],
+        "csi": [
+          {
+            "feature": "term",
+            "csi_test": 8.902155144863055e-05,
+            "shift_bin": "<= 36",
+            "train_share": 0.9069230559485686,
+            "shift_share": 1.0,
+            "csi_oot": 0.6446848682146875,
+            "status": "alert"
+          },
+          {
+            "feature": "num_tl_op_past_12m",
+            "csi_test": 5.0662803546965787e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3851281180843984,
+            "status": "alert"
+          },
+          {
+            "feature": "total_rev_hi_lim",
+            "csi_test": 0.000150767675043541,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3831093751249728,
+            "status": "alert"
+          },
+          {
+            "feature": "num_rev_tl_bal_gt_0",
+            "csi_test": 6.585868458508382e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.38115779916757736,
+            "status": "alert"
+          },
+          {
+            "feature": "mo_sin_old_rev_tl_op",
+            "csi_test": 6.865436507342482e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3792487706205655,
+            "status": "alert"
+          },
+          {
+            "feature": "tot_hi_cred_lim",
+            "csi_test": 5.997313594273298e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.37908617945410833,
+            "status": "alert"
+          },
+          {
+            "feature": "mo_sin_rcnt_tl",
+            "csi_test": 6.304029370543643e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3783122706853772,
+            "status": "alert"
+          },
+          {
+            "feature": "acc_open_past_24mths",
+            "csi_test": 8.017354601432191e-05,
+            "shift_bin": "> 7",
+            "train_share": 0.12054982109909686,
+            "shift_share": 0.15606893661086318,
+            "csi_oot": 0.09121757094905232,
+            "status": "stable"
+          },
+          {
+            "feature": "mort_acc",
+            "csi_test": 2.612815423844614e-05,
+            "shift_bin": "> 4",
+            "train_share": 0.10757382502552482,
+            "shift_share": 0.08448186592371607,
+            "csi_oot": 0.08728403060891851,
+            "status": "stable"
+          },
+          {
+            "feature": "verification_status",
+            "csi_test": 5.740052334728098e-06,
+            "shift_bin": "{Source Verified}",
+            "train_share": 0.32310927042969545,
+            "shift_share": 0.4294607855223255,
+            "csi_oot": 0.05204228575844808,
+            "status": "stable"
+          },
+          {
+            "feature": "percent_bc_gt_75",
+            "csi_test": 7.370168491836312e-05,
+            "shift_bin": "<= 0",
+            "train_share": 0.17832526941173263,
+            "shift_share": 0.24746048965704281,
+            "csi_oot": 0.04901257660165781,
+            "status": "stable"
+          },
+          {
+            "feature": "revol_util",
+            "csi_test": 4.6180695222504025e-05,
+            "shift_bin": "(58.8, 86.9]",
+            "train_share": 0.36944778547645807,
+            "shift_share": 0.30925318671564883,
+            "csi_oot": 0.03182467503663505,
+            "status": "stable"
+          },
+          {
+            "feature": "inq_last_6mths",
+            "csi_test": 1.21019161885024e-05,
+            "shift_bin": "<= 0",
+            "train_share": 0.5412047710947039,
+            "shift_share": 0.6111837076851007,
+            "csi_oot": 0.029170495870686708,
+            "status": "stable"
+          },
+          {
+            "feature": "bc_open_to_buy",
+            "csi_test": 1.7697291392324776e-05,
+            "shift_bin": "> 8,449",
+            "train_share": 0.28221200893141174,
+            "shift_share": 0.3309314825316206,
+            "csi_oot": 0.028549813678930957,
+            "status": "stable"
+          },
+          {
+            "feature": "mths_since_recent_bc",
+            "csi_test": 7.386075238792405e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.024531085736099204,
+            "shift_share": 0.009597130106758056,
+            "csi_oot": 0.015547672603541497,
+            "status": "stable"
+          },
+          {
+            "feature": "loan_to_inc",
+            "csi_test": 6.542208822869332e-05,
+            "shift_bin": "<= 0.1516",
+            "train_share": 0.3555719829975975,
+            "shift_share": 0.40599497029019455,
+            "csi_oot": 0.014404087389758562,
+            "status": "stable"
+          },
+          {
+            "feature": "dti",
+            "csi_test": 3.773142763498161e-05,
+            "shift_bin": "> 25.16",
+            "train_share": 0.18955012709386768,
+            "shift_share": 0.23116324366971572,
+            "csi_oot": 0.010848159803101137,
+            "status": "stable"
+          },
+          {
+            "feature": "annual_inc",
+            "csi_test": 2.4609448992296394e-05,
+            "shift_bin": "> 110,000",
+            "train_share": 0.12568507987675379,
+            "shift_share": 0.14488153060972903,
+            "csi_oot": 0.004055375915667131,
+            "status": "stable"
+          },
+          {
+            "feature": "home_ownership",
+            "csi_test": 1.760758356933623e-05,
+            "shift_bin": "{OWN}",
+            "train_share": 0.09578242256968955,
+            "shift_share": 0.11477107423753051,
+            "csi_oot": 0.004045514133318875,
+            "status": "stable"
+          },
+          {
+            "feature": "fico_mid",
+            "csi_test": 8.12224783581863e-05,
+            "shift_bin": "<= 672",
+            "train_share": 0.27094473613252906,
+            "shift_share": 0.28628048028797554,
+            "csi_oot": 0.003442897903332589,
+            "status": "stable"
+          }
+        ]
+      },
+      "with_platform_rating": {
+        "score_psi": [
+          {
+            "segment": "test",
+            "n_expected": 330071,
+            "n_actual": 141460,
+            "psi": 4.8534331525920316e-05,
+            "status": "stable"
+          },
+          {
+            "segment": "oot",
+            "n_expected": 330071,
+            "n_actual": 162236,
+            "psi": 0.031593716825484223,
+            "status": "stable"
+          }
+        ],
+        "csi": [
+          {
+            "feature": "term",
+            "csi_test": 8.902155144863055e-05,
+            "shift_bin": "<= 36",
+            "train_share": 0.9069230559485686,
+            "shift_share": 1.0,
+            "csi_oot": 0.6446848682146875,
+            "status": "alert"
+          },
+          {
+            "feature": "num_tl_op_past_12m",
+            "csi_test": 5.0662803546965787e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3851281180843984,
+            "status": "alert"
+          },
+          {
+            "feature": "total_rev_hi_lim",
+            "csi_test": 0.000150767675043541,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3831093751249728,
+            "status": "alert"
+          },
+          {
+            "feature": "num_rev_tl_bal_gt_0",
+            "csi_test": 6.585868458508382e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.38115779916757736,
+            "status": "alert"
+          },
+          {
+            "feature": "mo_sin_old_rev_tl_op",
+            "csi_test": 6.865436507342482e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3792487706205655,
+            "status": "alert"
+          },
+          {
+            "feature": "tot_hi_cred_lim",
+            "csi_test": 5.997313594273298e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.37908617945410833,
+            "status": "alert"
+          },
+          {
+            "feature": "mo_sin_rcnt_tl",
+            "csi_test": 6.304029370543643e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.058387437854279835,
+            "shift_share": 0.0,
+            "csi_oot": 0.3783122706853772,
+            "status": "alert"
+          },
+          {
+            "feature": "acc_open_past_24mths",
+            "csi_test": 8.017354601432191e-05,
+            "shift_bin": "> 7",
+            "train_share": 0.12054982109909686,
+            "shift_share": 0.15606893661086318,
+            "csi_oot": 0.09121757094905232,
+            "status": "stable"
+          },
+          {
+            "feature": "mort_acc",
+            "csi_test": 2.612815423844614e-05,
+            "shift_bin": "> 4",
+            "train_share": 0.10757382502552482,
+            "shift_share": 0.08448186592371607,
+            "csi_oot": 0.08728403060891851,
+            "status": "stable"
+          },
+          {
+            "feature": "verification_status",
+            "csi_test": 5.740052334728098e-06,
+            "shift_bin": "{Source Verified}",
+            "train_share": 0.32310927042969545,
+            "shift_share": 0.4294607855223255,
+            "csi_oot": 0.05204228575844808,
+            "status": "stable"
+          },
+          {
+            "feature": "percent_bc_gt_75",
+            "csi_test": 7.370168491836312e-05,
+            "shift_bin": "<= 0",
+            "train_share": 0.17832526941173263,
+            "shift_share": 0.24746048965704281,
+            "csi_oot": 0.04901257660165781,
+            "status": "stable"
+          },
+          {
+            "feature": "sub_grade",
+            "csi_test": 2.6815970409457384e-05,
+            "shift_bin": "{D4, D5, G4, E2, E1, E3, E4, F1, E5, G2, F2, F3, F4, F5, G5, G1, G3}",
+            "train_share": 0.11317262043620918,
+            "shift_share": 0.06442466530239897,
+            "csi_oot": 0.042540890696825734,
+            "status": "stable"
+          },
+          {
+            "feature": "inq_last_6mths",
+            "csi_test": 1.21019161885024e-05,
+            "shift_bin": "<= 0",
+            "train_share": 0.5412047710947039,
+            "shift_share": 0.6111837076851007,
+            "csi_oot": 0.029170495870686708,
+            "status": "stable"
+          },
+          {
+            "feature": "bc_open_to_buy",
+            "csi_test": 1.7697291392324776e-05,
+            "shift_bin": "> 8,449",
+            "train_share": 0.28221200893141174,
+            "shift_share": 0.3309314825316206,
+            "csi_oot": 0.028549813678930957,
+            "status": "stable"
+          },
+          {
+            "feature": "mths_since_recent_bc",
+            "csi_test": 7.386075238792405e-05,
+            "shift_bin": "Missing",
+            "train_share": 0.024531085736099204,
+            "shift_share": 0.009597130106758056,
+            "csi_oot": 0.015547672603541497,
+            "status": "stable"
+          },
+          {
+            "feature": "loan_to_inc",
+            "csi_test": 6.542208822869332e-05,
+            "shift_bin": "<= 0.1516",
+            "train_share": 0.3555719829975975,
+            "shift_share": 0.40599497029019455,
+            "csi_oot": 0.014404087389758562,
+            "status": "stable"
+          },
+          {
+            "feature": "dti",
+            "csi_test": 3.773142763498161e-05,
+            "shift_bin": "> 25.16",
+            "train_share": 0.18955012709386768,
+            "shift_share": 0.23116324366971572,
+            "csi_oot": 0.010848159803101137,
+            "status": "stable"
+          },
+          {
+            "feature": "log_annual_inc",
+            "csi_test": 2.4609448992296394e-05,
+            "shift_bin": "> 11.61",
+            "train_share": 0.12568507987675379,
+            "shift_share": 0.14488153060972903,
+            "csi_oot": 0.004055375915667131,
+            "status": "stable"
+          },
+          {
+            "feature": "home_ownership",
+            "csi_test": 1.760758356933623e-05,
+            "shift_bin": "{OWN}",
+            "train_share": 0.09578242256968955,
+            "shift_share": 0.11477107423753051,
+            "csi_oot": 0.004045514133318875,
+            "status": "stable"
+          },
+          {
+            "feature": "fico_mid",
+            "csi_test": 8.12224783581863e-05,
+            "shift_bin": "<= 672",
+            "train_share": 0.27094473613252906,
+            "shift_share": 0.28628048028797554,
+            "csi_oot": 0.003442897903332589,
+            "status": "stable"
+          }
+        ]
+      }
+    },
+    "vintage": {
+      "n_cohorts": 16,
+      "max_mob": 60,
+      "horizon": "2019-03",
+      "n_bad_missing_event": 443,
+      "n_bad_after_max_mob": 27
+    }
+  },
+  "checks": {
+    "n_pass": 21,
+    "n_warn": 4,
+    "n_fail": 0,
+    "n_info": 1,
+    "rows": [
+      {
+        "check": "样本 bad rate 在合理区间",
+        "scope": "数据",
+        "threshold": "1%–40%",
+        "value": "14.85%",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "IV 过高（疑似 leakage）",
+        "scope": "不含平台评级",
+        "threshold": "IV > 0.5",
+        "value": "最高 IV 0.1168（fico_mid）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征单一分箱占比过高",
+        "scope": "不含平台评级",
+        "threshold": "最大箱占比 > 90%",
+        "value": "最大 90.7%（term）",
+        "status": "warn",
+        "detail": "几乎所有人落在同一箱，区分度来自极少数人：term 90.7%"
+      },
+      {
+        "check": "train–test KS 差（LR scorecard）",
+        "scope": "不含平台评级",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.2467 − 0.2513 = -0.0045",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "train–test KS 差（GBDT challenger）",
+        "scope": "不含平台评级",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.2943 − 0.2790 = +0.0153",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "test KS 高得不合理",
+        "scope": "不含平台评级",
+        "threshold": "KS > 0.9",
+        "value": "0.2513",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → test",
+        "scope": "不含平台评级",
+        "threshold": "PSI > 0.25",
+        "value": "0.0001",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → OOT",
+        "scope": "不含平台评级",
+        "threshold": "PSI > 0.25",
+        "value": "0.0271",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 CSI（train → OOT）",
+        "scope": "不含平台评级",
+        "threshold": "CSI > 0.25",
+        "value": "7 / 20 个特征",
+        "status": "warn",
+        "detail": "分布偏移：term 0.645, num_tl_op_past_12m 0.385, total_rev_hi_lim 0.383, num_rev_tl_bal_gt_0 0.381, mo_sin_old_rev_tl_op 0.379, tot_hi_cred_lim 0.379, mo_sin_rcnt_tl 0.378"
+      },
+      {
+        "check": "入模特征缺失率过高",
+        "scope": "不含平台评级",
+        "threshold": "train 缺失率 > 50%",
+        "value": "最高 5.8%（tot_hi_cred_lim）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "LR 系数符号（WOE 越大越安全，系数应为负）",
+        "scope": "不含平台评级",
+        "threshold": "系数 > 0",
+        "value": "0 / 20 个为正",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 VIF",
+        "scope": "不含平台评级",
+        "threshold": "VIF > 5.0",
+        "value": "最高 2.75（num_tl_op_past_12m）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 平台评级）",
+        "scope": "不含平台评级",
+        "threshold": "swap-in > swap-out",
+        "value": "18.63% vs 19.97%",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "IV 过高（疑似 leakage）",
+        "scope": "含平台评级",
+        "threshold": "IV > 0.5",
+        "value": "最高 IV 0.3546（sub_grade）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征单一分箱占比过高",
+        "scope": "含平台评级",
+        "threshold": "最大箱占比 > 90%",
+        "value": "最大 90.7%（term）",
+        "status": "warn",
+        "detail": "几乎所有人落在同一箱，区分度来自极少数人：term 90.7%"
+      },
+      {
+        "check": "train–test KS 差（LR scorecard）",
+        "scope": "含平台评级",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.2729 − 0.2760 = -0.0031",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "train–test KS 差（GBDT challenger）",
+        "scope": "含平台评级",
+        "threshold": "KS(train) − KS(test) > 0.05",
+        "value": "0.3015 − 0.2920 = +0.0095",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "test KS 高得不合理",
+        "scope": "含平台评级",
+        "threshold": "KS > 0.9",
+        "value": "0.2760",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → test",
+        "scope": "含平台评级",
+        "threshold": "PSI > 0.25",
+        "value": "0.0000",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "score PSI train → OOT",
+        "scope": "含平台评级",
+        "threshold": "PSI > 0.25",
+        "value": "0.0316",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 CSI（train → OOT）",
+        "scope": "含平台评级",
+        "threshold": "CSI > 0.25",
+        "value": "7 / 20 个特征",
+        "status": "warn",
+        "detail": "分布偏移：term 0.645, num_tl_op_past_12m 0.385, total_rev_hi_lim 0.383, num_rev_tl_bal_gt_0 0.381, mo_sin_old_rev_tl_op 0.379, tot_hi_cred_lim 0.379, mo_sin_rcnt_tl 0.378"
+      },
+      {
+        "check": "入模特征缺失率过高",
+        "scope": "含平台评级",
+        "threshold": "train 缺失率 > 50%",
+        "value": "最高 5.8%（tot_hi_cred_lim）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "LR 系数符号（WOE 越大越安全，系数应为负）",
+        "scope": "含平台评级",
+        "threshold": "系数 > 0",
+        "value": "0 / 20 个为正",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "入模特征 VIF",
+        "scope": "含平台评级",
+        "threshold": "VIF > 5.0",
+        "value": "最高 2.77（num_tl_op_past_12m）",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "swap set：swap-in bad rate 低于 swap-out（OOT，基准 = 平台评级）",
+        "scope": "含平台评级",
+        "threshold": "swap-in > swap-out",
+        "value": "16.25% vs 22.09%",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "adapter / 切分警告",
+        "scope": "数据",
+        "threshold": "—",
+        "value": "—",
+        "status": "info",
+        "detail": "到期规则使不同期限的完整放款窗口不同（36 期贷款 issue_d <= 2015-12，60 期贷款 issue_d <= 2013-12）：最后几个月只有短期限贷款，train 与 OOT 的 term 构成不同（DECISIONS.md D5；可用 terms_allowed 只建单一期限的卡）"
+      }
+    ]
+  }
 }

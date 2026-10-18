@@ -317,6 +317,10 @@ def _jsonable(obj: Any) -> Any:
 
 def write_artifacts(result: RunResult, out_dir: Path) -> None:
     """CSV / JSON artifacts next to the report so every number is traceable."""
+    from scorecard import checks as checks_mod
+    from scorecard import monitor as monitor_mod
+    from scorecard import strategy as strategy_mod
+
     meta = result.meta
     pd.DataFrame(meta.sample_definition_log).to_csv(out_dir / "sample_definition.csv", index=False)
     meta.field_audit.to_csv(out_dir / "field_audit.csv", index=False)
@@ -357,4 +361,14 @@ def write_artifacts(result: RunResult, out_dir: Path) -> None:
         },
         "warnings": result.warnings,
     }
+    for mod in (strategy_mod, monitor_mod, checks_mod):
+        if getattr(mod, "IMPLEMENTED", False):
+            mod.write_artifacts(result, out_dir)
+    if result.strategy:
+        summary["strategy"] = strategy_mod.to_summary(result.strategy)
+    if result.monitor:
+        summary["monitor"] = monitor_mod.to_summary(result.monitor)
+    if result.checks:
+        summary["checks"] = {k: v for k, v in result.checks.items() if k != "table"}
+        summary["checks"]["rows"] = result.checks["table"].to_dict(orient="records")
     (out_dir / "results.json").write_text(json.dumps(_jsonable(summary), indent=2, ensure_ascii=False), encoding="utf-8")

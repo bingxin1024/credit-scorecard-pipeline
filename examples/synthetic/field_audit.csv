@@ -1,0 +1,21 @@
+column,group,decision,reason,group_name
+target,A,reserved,保留列（target / 日期 / 金额）,reserved
+issue_date,A,reserved,保留列（target / 日期 / 金额）,reserved
+event_date,A,reserved,保留列（target / 日期 / 金额）,reserved
+loan_amount,A,reserved,保留列（target / 日期 / 金额）,reserved
+net_cash,A,reserved,保留列（target / 日期 / 金额）,reserved
+grade,G,platform_rating,平台评级,platform rating
+fico_mid,I,keep,合成特征,candidate
+dti,I,keep,合成特征,candidate
+annual_inc,I,keep,合成特征,candidate
+revol_util,I,keep,合成特征,candidate
+inq_last_6mths,I,keep,合成特征,candidate
+delinq_2yrs,I,keep,合成特征,candidate
+credit_hist_months,I,keep,合成特征,candidate
+term,I,keep,合成特征,candidate
+noise_feature,I,keep,纯噪声特征（应被 IV 筛掉）,candidate
+purpose,I,keep,合成特征,candidate
+home_ownership,I,keep,合成特征,candidate
+loan_amnt,I,keep,合成特征,candidate
+mths_since_last_delinq,I,keep,合成特征,candidate
+mostly_missing,I,keep,合成特征,candidate

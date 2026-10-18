@@ -16,8 +16,8 @@ either way would bias the bad rate. The performance window is therefore the whol
 higher than a "12-month bad" definition would give.
 
 *Where:* `scorecard/adapters/lendingclub.py` (`transform`, rules 2–3), report §1.2.
-*Numbers:* maturity rule removes <<MATURITY_REMOVED>> loans, terminal-status rule removes
-<<INDET_REMOVED>> indeterminate ones; final sample <<N_ROWS>> loans, bad rate <<BAD_RATE>>.
+*Numbers:* maturity rule removes 1,584,209 loans, terminal-status rule removes
+157 indeterminate ones; final sample 633,767 loans, bad rate 14.85%.
 
 ### 2. Which leakage fields were removed? Give three and explain why `last_fico_range_*` is leakage.
 
@@ -31,7 +31,7 @@ outcome, not the applicant's risk at application. The field audit classifies eve
 151 raw columns into one group so nothing slips through by default.
 
 *Where:* `configs/lendingclub.yaml` → `field_groups`, report §1.4 (field audit).
-*Numbers:* <<N_DROPPED_LEAK>> columns dropped as leakage (groups B/C/D), <<N_CANDIDATES>> candidates kept.
+*Numbers:* 31 columns dropped as leakage (groups B/C/D), 99 candidates kept.
 
 ### 3. Why is WOE refitted inside every CV fold? What goes wrong if it is done outside?
 
@@ -43,7 +43,7 @@ bins and WOE on the fitting folds only keeps the validation fold honest. The sam
 the train / test / OOT design: binning, WOE, selection and the LR are fitted on train only.
 
 *Where:* `scorecard/model.py` → `cross_validate_scorecard`; `scorecard/pipeline.py` → `fit_variant`.
-*Numbers:* 5-fold CV AUC <<CV_AUC>> vs test AUC <<TEST_AUC>> — close, as they should be.
+*Numbers:* 5-fold CV AUC 0.6719 ± 0.0026 vs test AUC 0.6744 — close, as they should be.
 
 ### 4. How is monotonicity enforced? What happens when a feature is not monotone?
 
@@ -56,7 +56,7 @@ their grouping is monotone by construction. Monotone bins give scores that can b
 genuinely U-shaped features.
 
 *Where:* `scorecard/binning.py` → `merge_to_monotonic`, report §2.4.
-*Numbers:* <<N_NONMONO>> of <<N_SELECTED>> scorecard features needed merging; all are monotone after.
+*Numbers:* 0 of 20 scorecard features needed merging; all are monotone after.
 
 ### 5. How were the IV thresholds set? What does a very high IV mean?
 
@@ -68,7 +68,7 @@ is itself a sanity check that the leakage fields were really removed. Thresholds
 feature.
 
 *Where:* `scorecard/select.py`, report §2.2–2.3.
-*Numbers:* top IV <<TOP_IV_FEATURE>> = <<TOP_IV>>; <<N_IV_DROPPED>> features dropped for IV < 0.02; 0 flagged > 0.5.
+*Numbers:* top IV fico_mid = 0.1168; 36 features dropped for IV < 0.02; 0 flagged > 0.5.
 
 ### 6. Why ship the logistic regression and not the GBDT? What is the challenger for?
 
@@ -80,7 +80,7 @@ If the gap were large, we would revisit binning or add interactions; a small gap
 scorecard is near the ceiling of this data.
 
 *Where:* `scorecard/model.py` → `GBDTChallenger`, report §3.4.
-*Numbers:* test AUC LR <<TEST_AUC>> vs GBDT <<GBDT_TEST_AUC>>; OOT <<OOT_AUC>> vs <<GBDT_OOT_AUC>>.
+*Numbers:* test AUC LR 0.6744 vs GBDT 0.6941; OOT 0.6750 vs 0.6959.
 
 ### 7. 600 points ↔ 20:1 odds, PDO 20: how are offset and factor computed?
 
@@ -90,7 +90,7 @@ so every 20 points double the odds. Offset = 600 − Factor × ln 20 = 600 − 2
 base points = Offset − Factor × b0 and each bin scores −Factor × bᵢ × WOEᵢ, rounded to integers.
 
 *Where:* `scorecard/scorecard.py`, report §4.1.
-*Numbers:* b0 = <<INTERCEPT>>, base points <<BASE_POINTS>>, score range <<SCORE_RANGE>>, integer-score test AUC <<SCORE_AUC_TEST>>.
+*Numbers:* b0 = -1.7453, base points 563.92 → 564, score range 485–640, integer-score test AUC 0.6740.
 
 ### 8. How is the cut-off chosen? Why do the profit-maximising and lowest-bad-rate cut-offs differ?
 
@@ -130,7 +130,7 @@ honest number to quote. Here the last six issue months are OOT and everything be
 split stratified at random into train / test.
 
 *Where:* `scorecard/split.py`, report §1.8.
-*Numbers:* test AUC <<TEST_AUC>> vs OOT AUC <<OOT_AUC>>; OOT = <<N_OOT>> loans issued 2015-07 … 2015-12.
+*Numbers:* test AUC 0.6744 vs OOT AUC 0.6750; OOT = 162,236 loans issued 2015-07 … 2015-12.
 
 ### 12. With vs without the platform rating — how big is the gap, and should it be used?
 

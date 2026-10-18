@@ -1,0 +1,38 @@
+{
+  "config_path": "configs\\synthetic.yaml",
+  "config_hash": "f72ef3f50f97",
+  "git_commit": "24db62f",
+  "timestamp": "2026-10-19 00:42:15",
+  "versions": {
+    "python": "3.13.2",
+    "credit-scorecard-pipeline": "0.1.0",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1",
+    "toad": "0.1.7",
+    "matplotlib": "3.11.2"
+  },
+  "output_dir": "outputs\\synthetic",
+  "data_file": "synthetic",
+  "n_raw_rows": 20000,
+  "n_rows": 20000,
+  "cache_hit": null,
+  "timings": {
+    "load": 0.12,
+    "split": 0.02,
+    "profile": 0.04,
+    "variants": 2.56,
+    "strategy": 0.0,
+    "monitor": 0.0,
+    "checks": 0.0,
+    "artifacts": 0.02,
+    "report": 1.73,
+    "variant.no_platform_rating.binning": 0.1,
+    "variant.no_platform_rating.select_and_lr": 0.04,
+    "variant.no_platform_rating.gbdt": 0.31,
+    "variant.no_platform_rating.scoring": 0.16,
+    "variant.no_platform_rating.cv_lr": 0.24,
+    "variant.no_platform_rating.cv_gbdt": 1.7
+  },
+  "duration_seconds": 4.5
+}

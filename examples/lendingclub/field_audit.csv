@@ -1,0 +1,158 @@
+column,group,decision,reason,group_name
+id,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+member_id,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+loan_amnt,I,keep,申请时可得,available at application (candidate feature)
+funded_amnt,I,keep,申请时可得,available at application (candidate feature)
+funded_amnt_inv,F,drop,投资人侧,investor side
+term,I,keep,申请时可得,available at application (candidate feature)
+int_rate,G,platform_rating,平台评级，按 use_platform_rating 开关,platform rating (switch: use_platform_rating)
+installment,G,platform_rating,平台评级，按 use_platform_rating 开关,platform rating (switch: use_platform_rating)
+grade,G,platform_rating,平台评级，按 use_platform_rating 开关,platform rating (switch: use_platform_rating)
+sub_grade,G,platform_rating,平台评级，按 use_platform_rating 开关,platform rating (switch: use_platform_rating)
+emp_title,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+emp_length,I,derived,→ emp_length_years（'10+ years' → 10，'< 1 year' → 0，n/a → NaN）,available at application (candidate feature)
+home_ownership,I,keep,申请时可得,available at application (candidate feature)
+annual_inc,I,keep,申请时可得,available at application (candidate feature)
+verification_status,I,keep,申请时可得,available at application (candidate feature)
+issue_d,I,reserved,issue_date：时间切分 / OOT / vintage，不作为特征,available at application (candidate feature)
+loan_status,A,reserved,→ target（终态映射）,target source
+pymnt_plan,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+url,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+desc,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+purpose,I,keep,申请时可得,available at application (candidate feature)
+title,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+zip_code,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+addr_state,I,keep,申请时可得,available at application (candidate feature)
+dti,I,keep,申请时可得,available at application (candidate feature)
+delinq_2yrs,I,keep,申请时可得,available at application (candidate feature)
+earliest_cr_line,I,derived,→ credit_hist_months = months(issue_d − earliest_cr_line),available at application (candidate feature)
+fico_range_low,I,derived,→ fico_mid = (fico_range_low + fico_range_high) / 2,available at application (candidate feature)
+fico_range_high,I,derived,→ fico_mid,available at application (candidate feature)
+inq_last_6mths,I,keep,申请时可得,available at application (candidate feature)
+mths_since_last_delinq,I,keep,申请时可得,available at application (candidate feature)
+mths_since_last_record,I,keep,申请时可得,available at application (candidate feature)
+open_acc,I,keep,申请时可得,available at application (candidate feature)
+pub_rec,I,keep,申请时可得,available at application (candidate feature)
+revol_bal,I,keep,申请时可得,available at application (candidate feature)
+revol_util,I,keep,申请时可得,available at application (candidate feature)
+total_acc,I,keep,申请时可得,available at application (candidate feature)
+initial_list_status,I,keep,申请时可得,available at application (candidate feature)
+out_prncp,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+out_prncp_inv,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+total_pymnt,B,reserved,net_cash input (strategy layer only),post-loan payment / balance (leakage)
+total_pymnt_inv,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+total_rec_prncp,B,reserved,net_cash consistency check only,post-loan payment / balance (leakage)
+total_rec_int,B,reserved,net_cash consistency check only,post-loan payment / balance (leakage)
+total_rec_late_fee,B,reserved,net_cash consistency check only,post-loan payment / balance (leakage)
+recoveries,B,reserved,net_cash consistency check only,post-loan payment / balance (leakage)
+collection_recovery_fee,B,reserved,net_cash input (strategy layer only),post-loan payment / balance (leakage)
+last_pymnt_d,B,reserved,event_date for vintage curves (monitor layer only),post-loan payment / balance (leakage)
+last_pymnt_amnt,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+next_pymnt_d,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+last_credit_pull_d,B,drop,贷后回款 / 余额，泄漏,post-loan payment / balance (leakage)
+last_fico_range_high,C,drop,贷后信用更新，泄漏,post-loan credit update (leakage)
+last_fico_range_low,C,drop,贷后信用更新，泄漏,post-loan credit update (leakage)
+collections_12_mths_ex_med,I,keep,申请时可得,available at application (candidate feature)
+mths_since_last_major_derog,I,keep,申请时可得,available at application (candidate feature)
+policy_code,E,drop,标识 / 自由文本 / 无信息,identifier / free text / no information
+application_type,I,keep,申请时可得,available at application (candidate feature)
+annual_inc_joint,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+dti_joint,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+verification_status_joint,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+acc_now_delinq,I,keep,申请时可得,available at application (candidate feature)
+tot_coll_amt,I,keep,申请时可得,available at application (candidate feature)
+tot_cur_bal,I,keep,申请时可得,available at application (candidate feature)
+open_acc_6m,I,keep,申请时可得,available at application (candidate feature)
+open_act_il,I,keep,申请时可得,available at application (candidate feature)
+open_il_12m,I,keep,申请时可得,available at application (candidate feature)
+open_il_24m,I,keep,申请时可得,available at application (candidate feature)
+mths_since_rcnt_il,I,keep,申请时可得,available at application (candidate feature)
+total_bal_il,I,keep,申请时可得,available at application (candidate feature)
+il_util,I,keep,申请时可得,available at application (candidate feature)
+open_rv_12m,I,keep,申请时可得,available at application (candidate feature)
+open_rv_24m,I,keep,申请时可得,available at application (candidate feature)
+max_bal_bc,I,keep,申请时可得,available at application (candidate feature)
+all_util,I,keep,申请时可得,available at application (candidate feature)
+total_rev_hi_lim,I,keep,申请时可得,available at application (candidate feature)
+inq_fi,I,keep,申请时可得,available at application (candidate feature)
+total_cu_tl,I,keep,申请时可得,available at application (candidate feature)
+inq_last_12m,I,keep,申请时可得,available at application (candidate feature)
+acc_open_past_24mths,I,keep,申请时可得,available at application (candidate feature)
+avg_cur_bal,I,keep,申请时可得,available at application (candidate feature)
+bc_open_to_buy,I,keep,申请时可得,available at application (candidate feature)
+bc_util,I,keep,申请时可得,available at application (candidate feature)
+chargeoff_within_12_mths,I,keep,申请时可得,available at application (candidate feature)
+delinq_amnt,I,keep,申请时可得,available at application (candidate feature)
+mo_sin_old_il_acct,I,keep,申请时可得,available at application (candidate feature)
+mo_sin_old_rev_tl_op,I,keep,申请时可得,available at application (candidate feature)
+mo_sin_rcnt_rev_tl_op,I,keep,申请时可得,available at application (candidate feature)
+mo_sin_rcnt_tl,I,keep,申请时可得,available at application (candidate feature)
+mort_acc,I,keep,申请时可得,available at application (candidate feature)
+mths_since_recent_bc,I,keep,申请时可得,available at application (candidate feature)
+mths_since_recent_bc_dlq,I,keep,申请时可得,available at application (candidate feature)
+mths_since_recent_inq,I,keep,申请时可得,available at application (candidate feature)
+mths_since_recent_revol_delinq,I,keep,申请时可得,available at application (candidate feature)
+num_accts_ever_120_pd,I,keep,申请时可得,available at application (candidate feature)
+num_actv_bc_tl,I,keep,申请时可得,available at application (candidate feature)
+num_actv_rev_tl,I,keep,申请时可得,available at application (candidate feature)
+num_bc_sats,I,keep,申请时可得,available at application (candidate feature)
+num_bc_tl,I,keep,申请时可得,available at application (candidate feature)
+num_il_tl,I,keep,申请时可得,available at application (candidate feature)
+num_op_rev_tl,I,keep,申请时可得,available at application (candidate feature)
+num_rev_accts,I,keep,申请时可得,available at application (candidate feature)
+num_rev_tl_bal_gt_0,I,keep,申请时可得,available at application (candidate feature)
+num_sats,I,keep,申请时可得,available at application (candidate feature)
+num_tl_120dpd_2m,I,keep,申请时可得,available at application (candidate feature)
+num_tl_30dpd,I,keep,申请时可得,available at application (candidate feature)
+num_tl_90g_dpd_24m,I,keep,申请时可得,available at application (candidate feature)
+num_tl_op_past_12m,I,keep,申请时可得,available at application (candidate feature)
+pct_tl_nvr_dlq,I,keep,申请时可得,available at application (candidate feature)
+percent_bc_gt_75,I,keep,申请时可得,available at application (candidate feature)
+pub_rec_bankruptcies,I,keep,申请时可得,available at application (candidate feature)
+tax_liens,I,keep,申请时可得,available at application (candidate feature)
+tot_hi_cred_lim,I,keep,申请时可得,available at application (candidate feature)
+total_bal_ex_mort,I,keep,申请时可得,available at application (candidate feature)
+total_bc_limit,I,keep,申请时可得,available at application (candidate feature)
+total_il_high_credit_limit,I,keep,申请时可得,available at application (candidate feature)
+revol_bal_joint,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_fico_range_low,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_fico_range_high,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_earliest_cr_line,H,derived,→ sec_app_credit_hist_months,joint application
+sec_app_inq_last_6mths,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_mort_acc,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_open_acc,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_revol_util,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_open_act_il,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_num_rev_accts,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_chargeoff_within_12_mths,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_collections_12_mths_ex_med,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+sec_app_mths_since_last_major_derog,H,keep,联合申请字段，缺失 = 非联合申请,joint application
+hardship_flag,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_type,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_reason,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_status,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+deferral_term,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_amount,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_start_date,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_end_date,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+payment_plan_start_date,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_length,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_dpd,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_loan_status,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+orig_projected_additional_accrued_interest,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_payoff_balance_amount,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+hardship_last_payment_amount,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+disbursement_method,I,keep,申请时可得,available at application (candidate feature)
+debt_settlement_flag,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+debt_settlement_flag_date,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+settlement_status,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+settlement_date,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+settlement_amount,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+settlement_percentage,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+settlement_term,D,drop,困难 / 和解 / 还款计划，贷后信息,hardship / settlement / payment plan (leakage)
+fico_mid,X,keep,(fico_range_low + fico_range_high) / 2,derived by adapter
+credit_hist_months,X,keep,months(issue_d − earliest_cr_line),derived by adapter
+emp_length_years,X,keep,emp_length 解析为年数,derived by adapter
+log_annual_inc,X,keep,log1p(annual_inc),derived by adapter
+loan_to_inc,X,keep,loan_amnt / annual_inc（annual_inc = 0 → NaN）,derived by adapter
+sec_app_credit_hist_months,X,keep,months(issue_d − sec_app_earliest_cr_line),derived by adapter

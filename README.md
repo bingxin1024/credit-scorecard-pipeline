@@ -46,17 +46,17 @@ produced them.
 
 | Item | Value |
 |---|---|
-| Raw loans → final sample | <<RAW_ROWS>> → <<N_ROWS>> matured loans issued 2012-01 … 2015-12 |
-| Bad rate (Charged Off / Default vs Fully Paid) | <<BAD_RATE>> |
-| Split | train / test stratified 70/30 on 2012-01 … 2015-06; OOT = 2015-07 … 2015-12 (<<N_OOT>> loans) |
-| Candidate features → scorecard | <<N_CANDIDATES>> → <<N_SELECTED>> (missing > 50 % → IV < 0.02 → \|ρ\| > 0.7 → sign check) |
-| LR scorecard AUC / KS — train | <<TRAIN_AUC>> / <<TRAIN_KS>> |
-| LR scorecard AUC / KS — test | <<TEST_AUC>> / <<TEST_KS>> |
-| LR scorecard AUC / KS — OOT | <<OOT_AUC>> / <<OOT_KS>> |
-| GBDT challenger AUC — test / OOT | <<GBDT_TEST_AUC>> / <<GBDT_OOT_AUC>> |
-| 5-fold CV AUC (binning refitted per fold) | <<CV_AUC>> |
-| Scale | PDO 20, 600 points ↔ 20:1 good:bad odds; score range <<SCORE_RANGE>> |
-| Run time (full data, cached parse) | <<RUNTIME>> |
+| Raw loans → final sample | 2,260,701 → 633,767 matured loans issued 2012-01 … 2015-12 |
+| Bad rate (Charged Off / Default vs Fully Paid) | 14.85% |
+| Split | train / test stratified 70/30 on 2012-01 … 2015-06; OOT = 2015-07 … 2015-12 (162,236 loans) |
+| Candidate features → scorecard | 99 → 20 (missing > 50 % → IV < 0.02 → \|ρ\| > 0.7 → sign check) |
+| LR scorecard AUC / KS — train | 0.6733 / 0.2467 |
+| LR scorecard AUC / KS — test | 0.6744 / 0.2513 |
+| LR scorecard AUC / KS — OOT | 0.6750 / 0.2526 |
+| GBDT challenger AUC — test / OOT | 0.6941 / 0.6959 |
+| 5-fold CV AUC (binning refitted per fold) | 0.6719 ± 0.0026 |
+| Scale | PDO 20, 600 points ↔ 20:1 good:bad odds; score range 485–640 |
+| Run time (full data, cached parse) | 1.3 min |
 
 The scorecard deliberately excludes the platform's own rating (`grade`, `sub_grade`, `int_rate`,
 `installment`); Phase 2 adds the "with platform rating" variant side by side.

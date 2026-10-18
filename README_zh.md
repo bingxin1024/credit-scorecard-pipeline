@@ -34,17 +34,17 @@ python -m scorecard run --config configs/lendingclub.yaml --sample-frac 0.1  # �
 
 | 项目 | 数值 |
 |---|---|
-| 原始贷款 → 最终样本 | <<RAW_ROWS>> → <<N_ROWS>>（2012-01 … 2015-12 放款、已到期） |
-| bad rate（Charged Off / Default vs Fully Paid） | <<BAD_RATE>> |
-| 切分 | 2012-01 … 2015-06 分层随机 train / test 70/30；OOT = 2015-07 … 2015-12（<<N_OOT>> 笔） |
-| 候选特征 → 入模 | <<N_CANDIDATES>> → <<N_SELECTED>>（缺失 > 50% → IV < 0.02 → \|ρ\| > 0.7 → 系数符号） |
-| LR 评分卡 AUC / KS — train | <<TRAIN_AUC>> / <<TRAIN_KS>> |
-| LR 评分卡 AUC / KS — test | <<TEST_AUC>> / <<TEST_KS>> |
-| LR 评分卡 AUC / KS — OOT | <<OOT_AUC>> / <<OOT_KS>> |
-| GBDT challenger AUC — test / OOT | <<GBDT_TEST_AUC>> / <<GBDT_OOT_AUC>> |
-| 5 折 CV AUC（每折重做分箱） | <<CV_AUC>> |
-| 刻度 | PDO 20，600 分 ↔ 20:1 好坏比；分数范围 <<SCORE_RANGE>> |
-| 全量运行时间（解析已缓存） | <<RUNTIME>> |
+| 原始贷款 → 最终样本 | 2,260,701 → 633,767（2012-01 … 2015-12 放款、已到期） |
+| bad rate（Charged Off / Default vs Fully Paid） | 14.85% |
+| 切分 | 2012-01 … 2015-06 分层随机 train / test 70/30；OOT = 2015-07 … 2015-12（162,236 笔） |
+| 候选特征 → 入模 | 99 → 20（缺失 > 50% → IV < 0.02 → \|ρ\| > 0.7 → 系数符号） |
+| LR 评分卡 AUC / KS — train | 0.6733 / 0.2467 |
+| LR 评分卡 AUC / KS — test | 0.6744 / 0.2513 |
+| LR 评分卡 AUC / KS — OOT | 0.6750 / 0.2526 |
+| GBDT challenger AUC — test / OOT | 0.6941 / 0.6959 |
+| 5 折 CV AUC（每折重做分箱） | 0.6719 ± 0.0026 |
+| 刻度 | PDO 20，600 分 ↔ 20:1 好坏比；分数范围 485–640 |
+| 全量运行时间（解析已缓存） | 1.3 min |
 
 评分卡刻意不用平台自己的评级（`grade`、`sub_grade`、`int_rate`、`installment`）；Phase 2 会把"含 / 不含平台评级"两套模型并排展示。
 

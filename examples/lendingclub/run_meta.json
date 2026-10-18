@@ -1,0 +1,38 @@
+{
+  "config_path": "configs\\lendingclub.yaml",
+  "config_hash": "ca81f62454d0",
+  "git_commit": "24db62f",
+  "timestamp": "2026-10-19 00:42:15",
+  "versions": {
+    "python": "3.13.2",
+    "credit-scorecard-pipeline": "0.1.0",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1",
+    "toad": "0.1.7",
+    "matplotlib": "3.11.2"
+  },
+  "output_dir": "outputs\\lendingclub",
+  "data_file": "data/raw/accepted_2007_to_2018Q4.csv.gz",
+  "n_raw_rows": 2260701,
+  "n_rows": 633767,
+  "cache_hit": "data\\cache\\lendingclub_2767e594d504e290.pkl",
+  "timings": {
+    "load": 12.01,
+    "split": 0.21,
+    "profile": 2.36,
+    "variants": 63.65,
+    "strategy": 0.0,
+    "monitor": 0.0,
+    "checks": 0.0,
+    "artifacts": 0.03,
+    "report": 2.17,
+    "variant.no_platform_rating.binning": 5.3,
+    "variant.no_platform_rating.select_and_lr": 2.44,
+    "variant.no_platform_rating.gbdt": 6.53,
+    "variant.no_platform_rating.scoring": 8.18,
+    "variant.no_platform_rating.cv_lr": 11.82,
+    "variant.no_platform_rating.cv_gbdt": 29.35
+  },
+  "duration_seconds": 80.4
+}

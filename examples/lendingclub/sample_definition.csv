@@ -1,0 +1,7 @@
+step,rule,description,removed,remaining,bad_rate
+1,drop_summary_rows,剔除文件末尾的汇总行（id 非数字或 loan_status 为空）,33,2260668,0.19964990522912254
+2,credit_policy,剔除 loan_status 以 “Does not meet the credit policy” 开头的贷款（早期不同准入政策）,2749,2257919,0.19964990522912254
+3,maturity,到期筛选：issue_d + term 个月 <= 数据截止月 2018-12（保证 performance window 完整）,1584209,673710,0.148147213359602
+4,terminal_status,终态映射：Charged Off / Default → 1；Fully Paid → 0；Current / Late / In Grace Period 为 indeterminate，剔除,157,673553,0.148147213359602
+5,min_issue_date,只保留 issue_d >= 2012-01（2007–2011 量小且产品、客群与后期不同）,39786,633767,0.14850094750910034
+6,final_sample,最终样本量与 bad rate,0,633767,0.14850094750910034

@@ -60,36 +60,37 @@ whose bad rate falls outside 1–40 % stops with exit code 2 unless `--allow-any
 
 Numbers below are copied from [`examples/lendingclub/report.md`](examples/lendingclub/report.md);
 the report header records the config hash, data file, row count, git commit and timestamp that
-produced them. The card is built for one product (36-month loans) and runs in two variants, with
-and without the platform's own rating.
+produced them. The card is built for one product (36-month loans issued from 2013-01) and runs in
+two variants, with and without the platform's own rating.
 
 | Item | Value |
 |---|---|
-| Raw loans → final sample | 2,260,701 → 589,488 matured 36-month loans issued 2012-01 … 2015-12 |
-| Bad rate (Charged Off / Default vs Fully Paid) | 14.03 % |
-| Split | train 299,076 / test 128,176 stratified 70/30 on 2012-01 … 2015-06; OOT = 162,236 loans issued 2015-07 … 2015-12 |
-| Candidate features → scorecard | 99 → 6 (missing > 50 %: 35 → IV < 0.02: 41 → time-stability CSI > 0.25: 15 → \|ρ\| > 0.7: 2 → sign check: 0) |
-| LR scorecard AUC / KS — train | 0.6429 / 0.2047 |
-| LR scorecard AUC / KS — test | 0.6473 / 0.2134 |
-| LR scorecard AUC / KS — OOT | 0.6508 / 0.2149 |
-| 5-fold CV AUC (binning refitted per fold) | 0.6416 ± 0.0025 |
-| GBDT challenger AUC — test / OOT | 0.6890 / 0.6968 |
-| Variant with the platform rating, AUC / KS — test / OOT | 0.6753 / 0.2566 and 0.6897 / 0.2793 (`sub_grade` enters with IV 0.3154) |
-| Scale | PDO 20, 600 points ↔ 20:1 good:bad odds; score range 527–620 |
-| Constrained cut-off (OOT, approved bad rate ≤ 10 %) | score ≥ 567 approves 56.2 % at 9.95 % bad rate (with the platform rating: score ≥ 563, 66.95 %) |
-| At 70 % approval (OOT) | score ≥ 561 (actual 70.85 %), approved bad rate 11.27 % vs 14.71 % overall |
-| Swap set vs platform grade at 70 % (OOT) | swap-in 19.84 % vs swap-out 17.82 %: the application-only card loses to the grade by 0.42 pp; with the rating it wins by 0.51 pp |
-| Score PSI train → test / train → OOT | 0.0002 / 0.0003; every scorecard feature's CSI < 0.10 after the time-stability step removed 15 bureau fields |
-| Automatic checks | 24 pass / 1 warn (the swap set above) / 0 fail |
-| Run time (full data, both variants, cached parse) | 1.9 min |
+| Raw loans → final sample | 2,260,701 → 546,018 matured 36-month loans issued 2013-01 … 2015-12 |
+| Bad rate (Charged Off / Default vs Fully Paid) | 14.07 % |
+| Split | train 268,647 / test 115,135 stratified 70/30 on 2013-01 … 2015-06; OOT = 162,236 loans issued 2015-07 … 2015-12 |
+| Candidate features → scorecard | 99 → 15 (missing > 50 %: 35 → IV < 0.02: 40 → time-stability CSI > 0.25: 0 → \|ρ\| > 0.7: 8 → sign check: 1) |
+| LR scorecard AUC / KS — train | 0.6657 / 0.2377 |
+| LR scorecard AUC / KS — test | 0.6624 / 0.2319 |
+| LR scorecard AUC / KS — OOT | 0.6737 / 0.2491 |
+| 5-fold CV AUC (binning refitted per fold) | 0.6636 ± 0.0030 |
+| GBDT challenger AUC — test / OOT | 0.6865 / 0.6968 |
+| Variant with the platform rating, AUC / KS — test / OOT | 0.6816 / 0.2614 and 0.6981 / 0.2884 (`sub_grade` enters with IV 0.3378) |
+| Scale | PDO 20, 600 points ↔ 20:1 good:bad odds; score range 506–648 |
+| Constrained cut-off (OOT, approved bad rate ≤ 10 %) | score ≥ 564 approves 63.8 % at 9.93 % bad rate (with the platform rating: score ≥ 560, 69.7 %) |
+| At 70 % approval (OOT) | score ≥ 561 (actual 69.86 %), approved bad rate 10.58 % vs 14.71 % overall |
+| Swap set vs platform grade at 70 % (OOT) | swap-in 18.53 % vs swap-out 19.25 %: the application-only card beats the grade by 0.14 pp; with the rating by 0.82 pp |
+| Score PSI train → test / train → OOT | 0.0002 / 0.0020; every scorecard feature's CSI < 0.10 (max `percent_bc_gt_75` 0.0250) |
+| Automatic checks | 25 pass / 0 warn / 0 fail |
+| Run time (full data, both variants, cached parse) | 2.1 min |
 
-The time-stability step (section 2.3b) drops features whose bin distribution differs between the
-earliest and latest issue year inside train; on Lending Club those are the bureau fields that
-only started being populated during 2012. It buys a card whose section 6 shows no drift at all,
-at the price of about 0.02 AUC on test and 0.024 on OOT against a card that keeps them
-(`select.max_time_csi: null`: 15 features, test 0.6656 / OOT 0.6743). Starting the sample at
-2013-01 keeps both the filter and the features (test 0.6624 / OOT 0.6737); the trade-off is
-recorded in `DECISIONS.md` (D26) and left to the user.
+Why the sample starts in 2013: the time-stability step (section 2.3b) drops features whose bin
+distribution differs between the earliest and latest issue year inside train. Lending Club's bureau
+fields (`num_*`, `mo_sin_*`, `tot_*`, `bc_*`) are only populated from mid-2012, so with a 2012-01
+start the step removed 15 of them for "just started to exist" rather than genuine drift and left a
+6-variable card (test AUC 0.6473 / OOT 0.6508), while the same sample without the step kept 15
+variables at 0.6656 / 0.6743. Starting the sample after the fields' availability stabilised keeps
+both the step and the variables (15 variables, test 0.6624 / OOT 0.6737, nothing dropped for time
+instability, no CSI alert in section 6); the trade-off is recorded in `DECISIONS.md` (D26).
 
 ### UCI credit-card default (second dataset)
 
@@ -150,14 +151,14 @@ configs/            default.yaml, lendingclub.yaml, uci.yaml, synthetic.yaml
 examples/           committed reports + figures (lendingclub, uci, synthetic)
 tests/              synthetic fixtures only (never read data/raw); CI runs ruff + pytest + a synthetic smoke run
 SKILL.md            agent entry point: inputs, steps, outputs, guardrails
-DECISIONS.md        decision log (Chinese)      FAQ.md   interview Q&A with the actual numbers
+DECISIONS.md        decision log (Chinese)      FAQ.md / FAQ_zh.md   interview Q&A with the actual numbers
 ```
 
 ## Status
 
 - Phase 1: pipeline end to end, report sections 1–4, Lending Club adapter.
 - Phase 2: strategy + monitoring layers, section 7 checks, with / without platform-rating scorecards.
-- Phase 3 (v1.0): `SKILL.md` with CLI guardrails, UCI adapter, time-stability feature filter,
-  constrained cut-offs, GitHub Actions CI.
+- Phase 3 (v1.0 / v1.0.1): `SKILL.md` with CLI guardrails, UCI adapter, time-stability feature
+  filter, constrained cut-offs, GitHub Actions CI; v1.0.1 fixes the sample start at 2013-01.
 
 License: MIT.

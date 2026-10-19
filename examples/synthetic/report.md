@@ -2,8 +2,8 @@
 
 - **数据**：synthetic（20,000 行）
 - **config hash**：9a370c300c47
-- **git commit**：ab257db
-- **生成时间**：2026-10-19 03:00:17
+- **git commit**：b951183
+- **生成时间**：2026-10-19 13:01:55
 
 - **样本**：20,000 笔，bad rate 17.90%
 - **入模特征**：7 / 14
@@ -1230,9 +1230,9 @@ _对 leakage、单箱占比、train–test KS 差、PSI / CSI、高缺失率入�
 
 - **config**：configs\synthetic.yaml（hash 9a370c300c47）
 - **数据文件**：synthetic；原始 20,000 行 → 样本 20,000 行
-- **git commit**：ab257db
-- **运行时间**：2026-10-19 03:00:17
-- **总耗时**：2.9 s
+- **git commit**：b951183
+- **运行时间**：2026-10-19 13:01:55
+- **总耗时**：3.5 s
 - **版本**：python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2
 - **缓存**：未命中 / 未启用
 
@@ -1240,26 +1240,26 @@ _对 leakage、单箱占比、train–test KS 差、PSI / CSI、高缺失率入�
 
 | 步骤 | 秒 |
 |---|---|
-| load | 0.1 |
+| load | 0.2 |
 | split | 0.0 |
-| profile | 0.0 |
-| variants | 2.5 |
+| profile | 0.1 |
+| variants | 3.0 |
 | strategy | 0.1 |
 | monitor | 0.1 |
 | checks | 0.0 |
 | artifacts | 0.1 |
 | variant.no_platform_rating.binning | 0.1 |
-| variant.no_platform_rating.select_and_lr | 0.0 |
-| variant.no_platform_rating.gbdt | 0.1 |
+| variant.no_platform_rating.select_and_lr | 0.1 |
+| variant.no_platform_rating.gbdt | 0.2 |
 | variant.no_platform_rating.scoring | 0.1 |
-| variant.no_platform_rating.cv_lr | 0.2 |
-| variant.no_platform_rating.cv_gbdt | 0.5 |
+| variant.no_platform_rating.cv_lr | 0.3 |
+| variant.no_platform_rating.cv_gbdt | 0.7 |
 | variant.with_platform_rating.binning | 0.1 |
 | variant.with_platform_rating.select_and_lr | 0.1 |
 | variant.with_platform_rating.gbdt | 0.1 |
 | variant.with_platform_rating.scoring | 0.1 |
 | variant.with_platform_rating.cv_lr | 0.3 |
-| variant.with_platform_rating.cv_gbdt | 0.6 |
+| variant.with_platform_rating.cv_gbdt | 0.7 |
 
 <details><summary>完整 config</summary>
 

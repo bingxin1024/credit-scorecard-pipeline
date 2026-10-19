@@ -46,7 +46,7 @@
 <body>
 <main>
 <h1>UCI 信用卡违约评分卡报告</h1>
-<div class="meta"><span><b>数据</b> data/raw/uci_default_of_credit_card_clients.csv（30,000 行）</span><span><b>config hash</b> f0649da10817</span><span><b>git commit</b> ab257db</span><span><b>生成时间</b> 2026-10-19 02:51:23</span></div>
+<div class="meta"><span><b>数据</b> data/raw/uci_default_of_credit_card_clients.csv（30,000 行）</span><span><b>config hash</b> f0649da10817</span><span><b>git commit</b> b951183</span><span><b>生成时间</b> 2026-10-19 13:02:10</span></div>
 <div class="headline">
   <div><div class="k">样本</div><div class="v">30,000 笔，bad rate 22.12%</div></div>
   <div><div class="k">入模特征</div><div class="v">17 / 32</div></div>
@@ -293,10 +293,10 @@
 </section>
 <section id="s8">
 <h2>附录：运行元数据</h2>
-<h3>运行元数据</h3>  <div class="kv"><div class="k">config</div><div>configs\uci.yaml（hash f0649da10817）</div><div class="k">数据文件</div><div>data/raw/uci_default_of_credit_card_clients.csv；原始 30,000 行 → 样本 30,000 行</div><div class="k">git commit</div><div>ab257db</div><div class="k">运行时间</div><div>2026-10-19 02:51:23</div><div class="k">总耗时</div><div>2.9 s</div><div class="k">版本</div><div>python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2</div><div class="k">缓存</div><div>未命中 / 未启用</div></div>
+<h3>运行元数据</h3>  <div class="kv"><div class="k">config</div><div>configs\uci.yaml（hash f0649da10817）</div><div class="k">数据文件</div><div>data/raw/uci_default_of_credit_card_clients.csv；原始 30,000 行 → 样本 30,000 行</div><div class="k">git commit</div><div>b951183</div><div class="k">运行时间</div><div>2026-10-19 13:02:10</div><div class="k">总耗时</div><div>5.0 s</div><div class="k">版本</div><div>python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2</div><div class="k">缓存</div><div>未命中 / 未启用</div></div>
 <details><summary>各步骤耗时（14 行）</summary>  <div class="table-wrap"><table>
     <thead><tr><th>步骤</th><th>秒</th></tr></thead>
-    <tbody><tr><td>load</td><td>0.2</td></tr><tr><td>split</td><td>0.0</td></tr><tr><td>profile</td><td>0.1</td></tr><tr><td>variants</td><td>2.4</td></tr><tr><td>strategy</td><td>0.1</td></tr><tr><td>monitor</td><td>0.1</td></tr><tr><td>checks</td><td>0.0</td></tr><tr><td>artifacts</td><td>0.0</td></tr><tr><td>variant.no_platform_rating.binning</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.select_and_lr</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.gbdt</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.scoring</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.cv_lr</td><td>0.6</td></tr><tr><td>variant.no_platform_rating.cv_gbdt</td><td>1.0</td></tr></tbody>
+    <tbody><tr><td>load</td><td>0.4</td></tr><tr><td>split</td><td>0.0</td></tr><tr><td>profile</td><td>0.1</td></tr><tr><td>variants</td><td>4.2</td></tr><tr><td>strategy</td><td>0.1</td></tr><tr><td>monitor</td><td>0.1</td></tr><tr><td>checks</td><td>0.0</td></tr><tr><td>artifacts</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.binning</td><td>0.3</td></tr><tr><td>variant.no_platform_rating.select_and_lr</td><td>0.3</td></tr><tr><td>variant.no_platform_rating.gbdt</td><td>0.6</td></tr><tr><td>variant.no_platform_rating.scoring</td><td>0.3</td></tr><tr><td>variant.no_platform_rating.cv_lr</td><td>0.9</td></tr><tr><td>variant.no_platform_rating.cv_gbdt</td><td>1.7</td></tr></tbody>
   </table></div>
 </details>  <details><summary>完整 config</summary><pre>dataset:
   adapter: uci

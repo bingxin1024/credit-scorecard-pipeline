@@ -32,7 +32,7 @@ dataset:
       H: [annual_inc_joint, dti_joint, verification_status_joint, revol_bal_joint, "sec_app_*"]
 
 sample:
-  min_issue_date: "2012-01"
+  min_issue_date: "2013-01"   # bureau fields are only populated from mid-2012; start after availability stabilises (DECISIONS.md D26)
 
 features:
   use_platform_rating: [false, true]   # Phase 2: both scorecards side by side (PLAN.md §9)

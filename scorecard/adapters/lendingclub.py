@@ -400,7 +400,7 @@ class LendingClubAdapter(Adapter):
             df = df[df["issue_d"] >= pd.Timestamp(min_issue)]
             log.add(
                 "min_issue_date",
-                f"只保留 issue_d >= {min_issue}（2007–2011 量小且产品、客群与后期不同）",
+                f"只保留 issue_d >= {min_issue}：主要征信字段自 2012 年中起才由征信局提供，起点取在字段可得性稳定之后；2007–2012 另有量小、产品与客群不同的问题",
                 n_before,
                 len(df),
                 float(df[TARGET].mean()) if len(df) else None,

@@ -4,5 +4,5 @@ step,rule,description,removed,remaining,bad_rate
 3,term_filter,仅保留 36 期（按产品分卡：不同期限是不同产品，且长期限贷款在 OOT 窗口内无法到期；config terms_allowed）,650603,1607316,0.1599550534499514
 4,maturity,到期筛选：issue_d + term 个月 <= 数据截止月 2018-12（保证 performance window 完整）,988585,618731,0.13895445081023758
 5,terminal_status,终态映射：Charged Off / Default → 1；Fully Paid → 0；Current / Late / In Grace Period 为 indeterminate，剔除,147,618584,0.13895445081023758
-6,min_issue_date,只保留 issue_d >= 2012-01（2007–2011 量小且产品、客群与后期不同）,29096,589488,0.1403387346307304
-7,final_sample,最终样本量与 bad rate,0,589488,0.1403387346307304
+6,min_issue_date,只保留 issue_d >= 2013-01：主要征信字段自 2012 年中起才由征信局提供，起点取在字段可得性稳定之后；2007–2012 另有量小、产品与客群不同的问题,72566,546018,0.1407004897274449
+7,final_sample,最终样本量与 bad rate,0,546018,0.1407004897274449

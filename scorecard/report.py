@@ -182,12 +182,17 @@ def build_section_1(result: RunResult, out_dir: Path, embed: bool) -> dict[str, 
     )
     pre = meta.extra_tables.get("bad_rate_by_year_before_min_issue_date")
     if pre is not None and len(pre):
+        pre = pre.copy()
+        single_term = "term_60_share" in pre.columns and pre["term_60_share"].round(6).nunique() <= 1
+        if single_term:
+            pre = pre.drop(columns=["term_60_share"])  # one product per card: the term mix carries no information
         blocks.append(
             table_block(
                 pre,
-                title="1.3 min_issue_date 之前：bad rate 按 issue 年（到期 + 终态样本）",
+                title="1.3 min_issue_date 之前：bad rate 按 issue 年",
                 rename={"issue_year": "issue 年", "n": "贷款数", "bad_rate": "bad rate", "term_60_share": "60 期占比"},
-                note=f"min_issue_date 规则只保留 issue_date >= {cfg.sample.min_issue_date} 的依据：早期年份样本少、产品结构（60 期占比）和 bad rate 与后期不同。",
+                note=f"min_issue_date 规则只保留 issue_date >= {cfg.sample.min_issue_date}；到期 + 终态样本。"
+                + ("早期年份样本少，bad rate 与后期不同。" if single_term else "早期年份样本少、产品结构（60 期占比）和 bad rate 与后期不同。"),
             )
         )
         path = fig.plot_bad_rate_by_period(pre.rename(columns={"issue_year": "period"}), out_dir / "figures" / "01_bad_rate_by_year_prefilter.png",

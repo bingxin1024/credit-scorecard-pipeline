@@ -49,29 +49,29 @@ CLI 内置护栏（详见 `SKILL.md`）：不改原数据；建模前先打印�
 
 ## Lending Club 结果
 
-以下数字抄自 [`examples/lendingclub/report.md`](examples/lendingclub/report.md)；报告头部记录了产生这些数字的 config hash、数据文件、行数、git commit 和时间。评分卡按产品分卡（只用 36 期贷款），并跑"含 / 不含平台评级"两套。
+以下数字抄自 [`examples/lendingclub/report.md`](examples/lendingclub/report.md)；报告头部记录了产生这些数字的 config hash、数据文件、行数、git commit 和时间。评分卡按产品分卡（只用 2013-01 起放款的 36 期贷款），并跑"含 / 不含平台评级"两套。
 
 | 项目 | 数值 |
 |---|---|
-| 原始贷款 → 最终样本 | 2,260,701 → 589,488（2012-01 … 2015-12 放款、已到期的 36 期贷款） |
-| bad rate（Charged Off / Default vs Fully Paid） | 14.03% |
-| 切分 | train 299,076 / test 128,176（2012-01 … 2015-06 分层随机 70/30）；OOT = 2015-07 … 2015-12 的 162,236 笔 |
-| 候选特征 → 入模 | 99 → 6（缺失 > 50%：35 → IV < 0.02：41 → 时间稳定性 CSI > 0.25：15 → \|ρ\| > 0.7：2 → 系数符号：0） |
-| LR 评分卡 AUC / KS — train | 0.6429 / 0.2047 |
-| LR 评分卡 AUC / KS — test | 0.6473 / 0.2134 |
-| LR 评分卡 AUC / KS — OOT | 0.6508 / 0.2149 |
-| 5 折 CV AUC（每折重做分箱） | 0.6416 ± 0.0025 |
-| GBDT challenger AUC — test / OOT | 0.6890 / 0.6968 |
-| 含平台评级的第二套卡 AUC / KS — test / OOT | 0.6753 / 0.2566，0.6897 / 0.2793（sub_grade 以 IV 0.3154 入模） |
-| 刻度 | PDO 20，600 分 ↔ 20:1 好坏比；分数范围 527–620 |
-| 约束下的 cut-off（OOT，通过客群 bad rate ≤ 10%） | score ≥ 567 通过 56.2%，bad rate 9.95%（含平台评级：score ≥ 563，66.95%） |
-| 通过率 70%（OOT） | score ≥ 561（实际 70.85%），通过客群 bad rate 11.27%（整体 14.71%） |
-| 70% 通过率下与平台 grade 的 swap set（OOT） | swap-in 19.84% vs swap-out 17.82%：只用申请信息的卡比 grade 差 0.42 pp；含平台评级则好 0.51 pp |
-| score PSI train → test / train → OOT | 0.0002 / 0.0003；时间稳定性筛选剔除 15 个征信字段后，入模特征 CSI 全部 < 0.10 |
-| 自动检查 | 24 通过 / 1 警告（上面的 swap set）/ 0 不通过 |
-| 全量运行时间（两套模型，解析已缓存） | 1.9 min |
+| 原始贷款 → 最终样本 | 2,260,701 → 546,018（2013-01 … 2015-12 放款、已到期的 36 期贷款） |
+| bad rate（Charged Off / Default vs Fully Paid） | 14.07% |
+| 切分 | train 268,647 / test 115,135（2013-01 … 2015-06 分层随机 70/30）；OOT = 2015-07 … 2015-12 的 162,236 笔 |
+| 候选特征 → 入模 | 99 → 15（缺失 > 50%：35 → IV < 0.02：40 → 时间稳定性 CSI > 0.25：0 → \|ρ\| > 0.7：8 → 系数符号：1） |
+| LR 评分卡 AUC / KS — train | 0.6657 / 0.2377 |
+| LR 评分卡 AUC / KS — test | 0.6624 / 0.2319 |
+| LR 评分卡 AUC / KS — OOT | 0.6737 / 0.2491 |
+| 5 折 CV AUC（每折重做分箱） | 0.6636 ± 0.0030 |
+| GBDT challenger AUC — test / OOT | 0.6865 / 0.6968 |
+| 含平台评级的第二套卡 AUC / KS — test / OOT | 0.6816 / 0.2614，0.6981 / 0.2884（sub_grade 以 IV 0.3378 入模） |
+| 刻度 | PDO 20，600 分 ↔ 20:1 好坏比；分数范围 506–648 |
+| 约束下的 cut-off（OOT，通过客群 bad rate ≤ 10%） | score ≥ 564 通过 63.8%，bad rate 9.93%（含平台评级：score ≥ 560，69.7%） |
+| 通过率 70%（OOT） | score ≥ 561（实际 69.86%），通过客群 bad rate 10.58%（整体 14.71%） |
+| 70% 通过率下与平台 grade 的 swap set（OOT） | swap-in 18.53% vs swap-out 19.25%：只用申请信息的卡比 grade 好 0.14 pp；含平台评级好 0.82 pp |
+| score PSI train → test / train → OOT | 0.0002 / 0.0020；入模特征 CSI 全部 < 0.10（最高 percent_bc_gt_75 0.0250） |
+| 自动检查 | 25 通过 / 0 警告 / 0 不通过 |
+| 全量运行时间（两套模型，解析已缓存） | 2.1 min |
 
-时间稳定性筛选（报告 2.3b）剔除 train 内最早与最晚 issue 年之间分箱分布差异大的特征；在 Lending Club 上就是 2012 年中才开始有值的那批征信字段。代价是比保留它们的卡（`select.max_time_csi: null`）低约 0.03 AUC，换来第 6 节没有任何漂移；两种口径和取舍记在 `DECISIONS.md`（D26）。
+为什么从 2013 年开始：时间稳定性筛选（报告 2.3b）剔除 train 内最早与最晚 issue 年之间分箱分布差异大的特征。Lending Club 的主要征信字段（num_*、mo_sin_*、tot_*、bc_*）2012 年中才由征信局提供，从 2012-01 起建样时，筛选会把 15 个"刚开始有值"而非真正漂移的字段剔掉，只剩 6 个变量（test AUC 0.6473 / OOT 0.6508）；同一样本关掉筛选则是 15 个变量、0.6656 / 0.6743。把起点取在字段可得性稳定之后，筛选和变量都保住（15 个变量，test 0.6624 / OOT 0.6737，无一因时间不稳定被剔除，第 6 节也没有 CSI 报警）；取舍记在 `DECISIONS.md`（D26）。
 
 ### UCI 信用卡违约（第二个数据集）
 
@@ -104,13 +104,13 @@ configs/            default.yaml、lendingclub.yaml、uci.yaml、synthetic.yaml
 examples/           已提交的报告与图（lendingclub、uci、synthetic）
 tests/              只用合成数据（不读 data/raw）；CI 跑 ruff + pytest + 合成数据冒烟
 SKILL.md            agent 入口：输入、步骤、输出、护栏
-DECISIONS.md        决策记录（中文）        FAQ.md   面试问答（英文，带实际数字）
+DECISIONS.md        决策记录（中文）        FAQ.md / FAQ_zh.md   面试问答（带实际数字）
 ```
 
 ## 进度
 
 - Phase 1：流程跑通，报告 1–4 节，Lending Club adapter。
 - Phase 2：策略层、监控层、第 7 节自动检查，含 / 不含平台评级两套模型。
-- Phase 3（v1.0）：`SKILL.md` 与 CLI 护栏、UCI adapter、时间稳定性筛选、约束下的 cut-off、GitHub Actions CI。
+- Phase 3（v1.0 / v1.0.1）：`SKILL.md` 与 CLI 护栏、UCI adapter、时间稳定性筛选、约束下的 cut-off、GitHub Actions CI；v1.0.1 把样本起点定为 2013-01。
 
 License: MIT.

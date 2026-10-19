@@ -1,5 +1,5 @@
 variant,segment,n_expected,n_actual,psi,status
-no_platform_rating,test,299076,128176,0.00020263419970742154,stable
-no_platform_rating,oot,299076,162236,0.0002970467730281082,stable
-with_platform_rating,test,299076,128176,0.0001512704602058335,stable
-with_platform_rating,oot,299076,162236,0.0032826451927531588,stable
+no_platform_rating,test,268647,115135,0.00019003676758244856,stable
+no_platform_rating,oot,268647,162236,0.001985363667976436,stable
+with_platform_rating,test,268647,115135,0.00014150861851957303,stable
+with_platform_rating,oot,268647,162236,0.006136892536667015,stable

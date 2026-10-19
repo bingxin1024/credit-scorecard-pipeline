@@ -46,7 +46,7 @@
 <body>
 <main>
 <h1>Synthetic 评分卡报告（演示）</h1>
-<div class="meta"><span><b>数据</b> synthetic（20,000 行）</span><span><b>config hash</b> 9a370c300c47</span><span><b>git commit</b> ab257db</span><span><b>生成时间</b> 2026-10-19 03:00:17</span></div>
+<div class="meta"><span><b>数据</b> synthetic（20,000 行）</span><span><b>config hash</b> 9a370c300c47</span><span><b>git commit</b> b951183</span><span><b>生成时间</b> 2026-10-19 13:01:55</span></div>
 <div class="headline">
   <div><div class="k">样本</div><div class="v">20,000 笔，bad rate 17.90%</div></div>
   <div><div class="k">入模特征</div><div class="v">7 / 14</div></div>
@@ -422,10 +422,10 @@
 </section>
 <section id="s8">
 <h2>附录：运行元数据</h2>
-<h3>运行元数据</h3>  <div class="kv"><div class="k">config</div><div>configs\synthetic.yaml（hash 9a370c300c47）</div><div class="k">数据文件</div><div>synthetic；原始 20,000 行 → 样本 20,000 行</div><div class="k">git commit</div><div>ab257db</div><div class="k">运行时间</div><div>2026-10-19 03:00:17</div><div class="k">总耗时</div><div>2.9 s</div><div class="k">版本</div><div>python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2</div><div class="k">缓存</div><div>未命中 / 未启用</div></div>
+<h3>运行元数据</h3>  <div class="kv"><div class="k">config</div><div>configs\synthetic.yaml（hash 9a370c300c47）</div><div class="k">数据文件</div><div>synthetic；原始 20,000 行 → 样本 20,000 行</div><div class="k">git commit</div><div>b951183</div><div class="k">运行时间</div><div>2026-10-19 13:01:55</div><div class="k">总耗时</div><div>3.5 s</div><div class="k">版本</div><div>python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2</div><div class="k">缓存</div><div>未命中 / 未启用</div></div>
 <details><summary>各步骤耗时（20 行）</summary>  <div class="table-wrap"><table>
     <thead><tr><th>步骤</th><th>秒</th></tr></thead>
-    <tbody><tr><td>load</td><td>0.1</td></tr><tr><td>split</td><td>0.0</td></tr><tr><td>profile</td><td>0.0</td></tr><tr><td>variants</td><td>2.5</td></tr><tr><td>strategy</td><td>0.1</td></tr><tr><td>monitor</td><td>0.1</td></tr><tr><td>checks</td><td>0.0</td></tr><tr><td>artifacts</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.binning</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.select_and_lr</td><td>0.0</td></tr><tr><td>variant.no_platform_rating.gbdt</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.scoring</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.cv_lr</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.cv_gbdt</td><td>0.5</td></tr><tr><td>variant.with_platform_rating.binning</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.select_and_lr</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.gbdt</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.scoring</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.cv_lr</td><td>0.3</td></tr><tr><td>variant.with_platform_rating.cv_gbdt</td><td>0.6</td></tr></tbody>
+    <tbody><tr><td>load</td><td>0.2</td></tr><tr><td>split</td><td>0.0</td></tr><tr><td>profile</td><td>0.1</td></tr><tr><td>variants</td><td>3.0</td></tr><tr><td>strategy</td><td>0.1</td></tr><tr><td>monitor</td><td>0.1</td></tr><tr><td>checks</td><td>0.0</td></tr><tr><td>artifacts</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.binning</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.select_and_lr</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.gbdt</td><td>0.2</td></tr><tr><td>variant.no_platform_rating.scoring</td><td>0.1</td></tr><tr><td>variant.no_platform_rating.cv_lr</td><td>0.3</td></tr><tr><td>variant.no_platform_rating.cv_gbdt</td><td>0.7</td></tr><tr><td>variant.with_platform_rating.binning</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.select_and_lr</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.gbdt</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.scoring</td><td>0.1</td></tr><tr><td>variant.with_platform_rating.cv_lr</td><td>0.3</td></tr><tr><td>variant.with_platform_rating.cv_gbdt</td><td>0.7</td></tr></tbody>
   </table></div>
 </details>  <details><summary>完整 config</summary><pre>dataset:
   adapter: synthetic

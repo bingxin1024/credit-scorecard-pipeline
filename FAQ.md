@@ -1,10 +1,10 @@
 # FAQ — interview questions this project answers
 
 Each answer: a spoken-style reply (≤ 150 words), the file / report section that backs it, and the
-actual numbers from `examples/lendingclub/report.md` (36-month Lending Club scorecard, both
-variants; numbers are copied from the report, never typed from memory; unless stated otherwise
-they refer to the scorecard *without* the platform rating). UCI numbers come from
-`examples/uci/report.md`.
+actual numbers from `examples/lendingclub/report.md` (36-month Lending Club scorecard on loans
+issued from 2013-01, both variants; numbers are copied from the report, never typed from memory;
+unless stated otherwise they refer to the scorecard *without* the platform rating). UCI numbers
+come from `examples/uci/report.md`. A Chinese spoken version is in `FAQ_zh.md`.
 
 ### 1. How is the default label defined? Why drop unmatured and indeterminate loans? What is the performance window?
 
@@ -17,9 +17,9 @@ indeterminate: we do not know their outcome and labelling them either way would 
 The performance window is therefore the whole 36-month term, longer than the 12–18 months a bank
 would use, which is why the bad rate is higher than a "12-month bad" definition would give.
 
-*Where:* `scorecard/adapters/lendingclub.py` (`transform`, rules 3–5), report §1.2.
+*Where:* `scorecard/adapters/lendingclub.py` (`transform`, rules 3–6), report §1.2.
 *Numbers:* term filter removes 650,603 60-month loans, maturity rule 988,585, terminal-status rule
-147 indeterminate ones, min_issue_date 29,096; final sample 589,488 loans, bad rate 14.03 %.
+147 indeterminate ones, the 2013-01 start 72,566; final sample 546,018 loans, bad rate 14.07 %.
 
 ### 2. Which leakage fields were removed? Give three and explain why `last_fico_range_*` is leakage.
 
@@ -46,7 +46,7 @@ bins and WOE on the fitting folds only keeps the validation fold honest. The sam
 the train / test / OOT design: binning, WOE, selection and the LR are fitted on train only.
 
 *Where:* `scorecard/model.py` → `cross_validate_scorecard`; `scorecard/pipeline.py` → `fit_variant`.
-*Numbers:* 5-fold CV AUC 0.6416 ± 0.0025 (KS 0.2050 ± 0.0038) vs test AUC 0.6473 — close, as
+*Numbers:* 5-fold CV AUC 0.6636 ± 0.0030 (KS 0.2373 ± 0.0039) vs test AUC 0.6624 — close, as
 they should be.
 
 ### 4. How is monotonicity enforced? What happens when a feature is not monotone?
@@ -60,7 +60,8 @@ their grouping is monotone by construction. Monotone bins give scores that can b
 genuinely U-shaped features.
 
 *Where:* `scorecard/binning.py` → `merge_to_monotonic`, report §2.4.
-*Numbers:* 0 of 6 scorecard features needed merging; `fico_mid` 6 bins, `dti` 4, `loan_to_inc` 4.
+*Numbers:* 1 of 15 scorecard features (`percent_bc_gt_75`) was not monotone after the chi-merge
+and was merged; all 15 are monotone in the final card.
 
 ### 5. How were the IV thresholds set? What does a very high IV mean?
 
@@ -73,8 +74,8 @@ are config (`select.min_iv`, `select.leakage_iv`), and the selection table recor
 removed each feature.
 
 *Where:* `scorecard/select.py`, report §2.2–2.3.
-*Numbers:* top IV `fico_mid` = 0.1307; 41 features dropped for IV < 0.02, 35 for missing > 50 %,
-15 for time instability, 2 for correlation; 0 flagged > 0.5.
+*Numbers:* top IV `fico_mid` = 0.1388; 40 features dropped for IV < 0.02, 35 for missing > 50 %,
+0 for time instability, 8 for correlation, 1 for a positive coefficient; 0 flagged > 0.5.
 
 ### 6. Why ship the logistic regression and not the GBDT? What is the challenger for?
 
@@ -82,12 +83,12 @@ The scorecard is a WOE logistic regression because every point is traceable to o
 variable, it can be implemented in a decision engine as a lookup table, and reason codes for
 declines fall out of it. The GBDT (HistGradientBoosting on raw features, missing values included)
 is a *challenger*: it tells us how much signal we leave on the table by insisting on a linear,
-monotone, binned model with few variables. Here the gap is about 0.04 AUC, most of it from the
-bureau fields the time-stability filter removed from the scorecard but not from the challenger;
-that is the price of a card that is stable across years, and it is worth stating rather than hiding.
+monotone, binned model. Here the gap is about 0.02 AUC on both test and OOT, which says the
+scorecard is close to the ceiling of this data; a larger gap would send us back to the binning
+or to interaction terms.
 
 *Where:* `scorecard/model.py` → `GBDTChallenger`, report §3.4.
-*Numbers:* test AUC LR 0.6473 vs GBDT 0.6890; OOT 0.6508 vs 0.6968 (KS 0.2149 vs 0.2866).
+*Numbers:* test AUC LR 0.6624 vs GBDT 0.6865; OOT 0.6737 vs 0.6968 (KS 0.2491 vs 0.2848).
 
 ### 7. 600 points ↔ 20:1 odds, PDO 20: how are offset and factor computed?
 
@@ -97,8 +98,8 @@ so every 20 points double the odds. Offset = 600 − Factor × ln 20 = 600 − 2
 base points = Offset − Factor × b0 and each bin scores −Factor × bᵢ × WOEᵢ, rounded to integers.
 
 *Where:* `scorecard/scorecard.py`, report §4.1.
-*Numbers:* b0 = −1.8348, base points 566.50 → 567, score range 527–620, integer-score AUC test
-0.6472 / OOT 0.6504.
+*Numbers:* b0 = −1.8355, base points 566.52 → 567, score range 506–648, integer-score AUC test
+0.6626 / OOT 0.6736.
 
 ### 8. How is the cut-off chosen? Why do the profit-maximising and lowest-bad-rate cut-offs differ?
 
@@ -109,15 +110,15 @@ reference. Profit uses realised net cash (`total_pymnt − collection_recovery_f
 nominal and undiscounted). The lowest bad rate is always at the tightest cut-off, but every extra
 tranche still earns interest from its goods, so total net cash keeps rising as long as the
 marginal tranche's interest covers its losses. Lending Club prices risk, so net cash per loan is
-almost flat across score bands and total net cash peaks at "approve everyone": on such a platform
-the scorecard's value is admission under a bad-rate cap and tiered pricing, not rejection.
+almost flat across score bands and total net cash peaks near "approve everyone": on such a
+platform the scorecard's value is admission under a bad-rate cap and tiered pricing, not rejection.
 
 *Where:* `scorecard/strategy.py` (`constrained_cutoffs`, `pick_cutoffs`, `profit_optimum`), report §5.2–5.4.
-*Numbers (OOT):* bad rate ≤ 10 % → score ≥ 567, approval 56.2 %, bad rate 9.95 %; at 70 % approval
-→ score ≥ 561 (actual 70.85 %), bad rate 11.27 % vs 14.71 % overall, marginal tranche 16.83 %.
-Total net cash peaks at 99.68 % approval (128.2 M, same as approve-all); per-loan net cash peaks at
-score ≥ 593 / 10.08 % approval (1,127 per loan vs 790 approve-all). With the platform rating the
-10 % cap allows 66.95 % approval (score ≥ 563).
+*Numbers (OOT):* bad rate ≤ 10 % → score ≥ 564, approval 63.8 %, bad rate 9.93 %; at 70 % approval
+→ score ≥ 561 (actual 69.86 %), bad rate 10.58 % vs 14.71 % overall, marginal tranche 16.64 %.
+Total net cash peaks at 96.70 % approval (129.2 M vs 128.2 M for approve-all); per-loan net cash
+peaks at score ≥ 598 / 10.24 % approval (1,212 per loan vs 790 approve-all). With the platform
+rating the 10 % cap allows 69.69 % approval (score ≥ 560).
 
 ### 9. How to read a swap set? What if swap-ins have a higher bad rate than swap-outs?
 
@@ -126,16 +127,17 @@ swap-outs the reverse; both cells hold the same number of loans by construction,
 rates are directly comparable. The baseline is the platform grade, approving from A downwards until
 the model's approval count is reached (ties inside the marginal grade broken at random with a fixed
 seed). The model adds value when swap-ins have a lower bad rate than swap-outs — those are exactly
-the loans the two strategies disagree on. Here the application-only scorecard *loses* that
-comparison on OOT: with six stable variables it cannot match a grade that already contains the
-bureau data plus pricing. Section 7 flags it as a warning rather than hiding it, and the
-with-platform variant shows the gap closing once `sub_grade` is allowed in.
+the loans the two strategies disagree on. If it is the other way round, the model is worse than the
+baseline where it matters: stop and check leakage, a population shift the baseline handles better,
+or whether the baseline uses information the model is not allowed to. Here the application-only
+card edges the grade; with `sub_grade` allowed in, the margin is clearly larger. Section 7 runs
+this comparison as an automatic check.
 
 *Where:* `scorecard/strategy.py` (`baseline_order`, `swap_set`), report §5.5; check in §7.
-*Numbers (OOT, score ≥ 561, 70.9 % approval):* swap-in 23,905 loans at 19.84 % vs swap-out 23,905
-at 17.82 %; approved bad rate model 11.27 % vs grade baseline 10.85 % (+0.42 pp). Test: 17.23 % vs
-16.79 % (+0.09 pp). With the platform rating: OOT swap-in 17.22 % vs swap-out 21.34 %, approved
-10.34 % vs 10.85 % (−0.51 pp).
+*Numbers (OOT, score ≥ 561, 69.9 % approval):* swap-in 22,419 loans at 18.53 % vs swap-out 22,419
+at 19.25 %; approved bad rate model 10.58 % vs grade baseline 10.72 % (−0.14 pp). Test: 16.67 % vs
+17.58 %, 10.14 % vs 10.33 % (−0.19 pp). With the platform rating: OOT swap-in 15.83 % vs swap-out
+22.06 %, approved 9.87 % vs 10.69 % (−0.82 pp).
 
 ### 10. PSI formula and the 0.10 / 0.25 thresholds; score PSI stable but a feature CSI high?
 
@@ -147,12 +149,14 @@ stable score with an unstable feature means the population moved on that feature
 absorbed it: look at *which* bin moved. Most such alerts are data-availability shifts — a bureau
 field that started being populated — so this project removes them *before* modelling: the
 selection step computes the same CSI between the earliest and latest issue year inside train and
-drops features above 0.25 (report §2.3b). Section 6 then only reports real drift.
+drops features above 0.25 (report §2.3b), and the sample starts after the bureau fields became
+available. Section 6 then only reports real drift.
 
 *Where:* `scorecard/select.py` (`time_stability_table`), `scorecard/monitor.py` (`score_psi`, `feature_csi`), report §2.3b, §6.1–6.2.
-*Numbers:* 15 features dropped for time instability, e.g. `num_tl_op_past_12m` CSI 4.82 (Missing
-51.65 % in 2012 → 0.00 % in 2015), `acc_open_past_24mths` 1.08 (13.8 % → 0.0 %). After that:
-score PSI train→test 0.0002, train→OOT 0.0003; every scorecard feature's CSI < 0.10 (max `dti` 0.0116).
+*Numbers:* with a 2012-01 start the time-stability step removed 15 bureau fields (e.g.
+`num_tl_op_past_12m` CSI 4.82, Missing 51.65 % → 0.00 %); from 2013-01 nothing is removed (largest
+time CSI 0.057, `acc_open_past_24mths`). Score PSI train→test 0.0002, train→OOT 0.0020; every
+scorecard feature's CSI < 0.10 (max `percent_bc_gt_75` 0.0250, bin "≤ 0" 18.94 % → 24.75 %).
 
 ### 11. OOT vs a random hold-out; why split by time?
 
@@ -166,26 +170,26 @@ different population out of time. Without a date column the pipeline falls back 
 hold-out and says so (UCI).
 
 *Where:* `scorecard/split.py`, report §1.8; vintage curves in §6.3.
-*Numbers:* test AUC 0.6473 vs OOT 0.6508 (KS 0.2134 vs 0.2149); OOT = 162,236 loans issued
-2015-07 … 2015-12. Vintage: 2012Q1 reaches 5.03 % cumulative default at month 12 and 13.11 % at
+*Numbers:* test AUC 0.6624 vs OOT 0.6737 (KS 0.2319 vs 0.2491); OOT = 162,236 loans issued
+2015-07 … 2015-12. Vintage: 2013Q1 reaches 4.32 % cumulative default at month 12 and 12.54 % at
 month 36; 2015Q4 reaches 5.48 % at month 12 and 14.71 % at month 36.
 
 ### 12. With vs without the platform rating — how big is the gap, and should it be used?
 
 Both variants run side by side (`features.use_platform_rating: [false, true]`). Without the rating
-the scorecard uses only application data that is stable across years; with it, `sub_grade` enters
-as the strongest variable (IV 0.3154, 2.4 times `fico_mid`) while `grade`, `int_rate` and
-`installment` fall to the correlation filter. The gain is large on this restricted card — about
-+0.04 AUC on OOT and 0.9 pp less bad rate at 70 % approval — because the grade encodes the bureau
-history the time filter removed, plus pricing. Whether to use it depends on who owns the decision:
-the platform can (it is their own model, and the combined card beats grade alone in the swap set),
-a third-party lender should not, because it would be modelling someone else's model and could not
-score an applicant without it.
+the scorecard uses only application and bureau data; with it, `sub_grade` enters as the strongest
+variable (IV 0.3378, 2.4 times `fico_mid`) while `grade`, `int_rate` and `installment` fall to the
+correlation filter. The gain is real but modest — about +0.02 AUC on test and OOT and 0.7 pp less
+bad rate at 70 % approval — because the grade is itself built from the bureau data the scorecard
+already sees, plus pricing. Whether to use it depends on who owns the decision: the platform can
+(it is their own model, and the combined card beats grade alone in the swap set), a third-party
+lender should not, because it would be modelling someone else's model and could not score an
+applicant without it.
 
 *Where:* `configs/lendingclub.yaml` → `features.use_platform_rating`, report §3 (both variants), §5.6.
-*Numbers:* LR AUC / KS test 0.6473 / 0.2134 → 0.6753 / 0.2566, OOT 0.6508 / 0.2149 → 0.6897 /
-0.2793; 5-fold CV AUC 0.6416 ± 0.0025 → 0.6704 ± 0.0027. Approved bad rate at 70 % approval:
-test 10.46 % → 9.94 % (−0.52 pp), OOT 11.27 % → 10.34 % (−0.93 pp); at 50 % on OOT 9.47 % → 7.74 %.
+*Numbers:* LR AUC / KS test 0.6624 / 0.2319 → 0.6816 / 0.2614, OOT 0.6737 / 0.2491 → 0.6981 /
+0.2884; 5-fold CV AUC 0.6636 ± 0.0030 → 0.6838 ± 0.0021. Approved bad rate at 70 % approval:
+test 10.14 % → 9.60 % (−0.54 pp), OOT 10.58 % → 9.87 % (−0.71 pp); at 50 % on OOT 8.44 % → 7.54 %.
 
 ### 13. What changes for a new dataset?
 

@@ -36,13 +36,14 @@
 - 选择：adapter 增加 `sample_frac`（按种子随机抽行，`--sample-frac 0.1`）和 `data_cutoff_month`（可显式指定截止月）。试跑用 `--sample-frac 0.1`，约 22.6 万原始行，时间结构与全量一致。
 - 代码：`scorecard/adapters/lendingclub.py` → `load_raw()`；`scorecard/cli.py`。
 
-### D5 **[待确认]** 到期规则导致 OOT 只有 36 期贷款
+### D5 **[已由 D25 定案：只建 36 期卡]** 到期规则导致 OOT 只有 36 期贷款
 - 截止月 2018-12 时，36 期贷款要 issue ≤ 2015-12，60 期贷款要 issue ≤ 2013-12。于是 2014–2015 的样本只有 36 期，OOT（2015-07 ~ 2015-12）全是 36 期；train 里 2012–2013 含 60 期。
 - 先按 PLAN 原样执行，`term` 作为特征入模；Phase 2 的 CSI 预计会在 `term` 上报警。可选方案：`sample.terms_allowed: [36]` 只建 36 期卡，或把 60 期截止提前。这是建模口径问题，留给用户决定。
 
 ### D5b **[待确认]** OOT 占样本 25.6%
 - `oot_months = 6` 按 PLAN 默认；但 Lending Club 放款量逐年放大，2015-07 ~ 2015-12 这 6 个月有 162,236 笔，占最终样本的 25.6%，train 只有 330,071 笔。
 - 先照默认执行（OOT 大一点只是让 OOT 指标更稳，不影响 train 质量）。若希望 train 更大，可把 `split.oot_months` 改成 3。
+- v1.0.1（2013-01 起点、36 期）后 OOT 占 29.71%（162,236 / 546,018），仍按默认 6 个月。
 
 ### D6 分箱 `max_bins = 6`
 - PLAN 只给了 `method = chi`、`min_samples = 0.05`，没有给箱数上限。chi 合并不设上限时 5% 下限意味着最多 20 箱，分数解释性差。
@@ -155,12 +156,13 @@ Phase 1 代码写完后跑了一轮 5 个视角（leakage / 数学 / adapter / �
 - 理由：不同期限是不同产品（定价、客群、久期都不同）；数据截止 2018-12 时只有 2013-12 前放款的 60 期贷款才到期，OOT 窗口（2015-07 ~ 2015-12）里不可能有 60 期贷款，混合建模会让 term 在 train / OOT 之间出现结构性漂移（Phase 2 报告里 term 的 CSI 0.6447 就是这个）。
 - 结果：最终样本 589,488 笔（bad rate 14.03%），train 299,076 / test 128,176 / OOT 162,236；term 成为常数被 IV 筛掉。要建 60 期卡，改 `terms_allowed: [60]` 并把 `data_cutoff_month` / `min_issue_date` 调到 60 期能到期的窗口。
 
-### D26 **[待确认]** select 新增时间稳定性筛选（`select.max_time_csi` = 0.25）：Lending Club 上剔除 15 个征信字段，AUC 降约 0.02
-- 做法：train 内取 issue 年最早的一年（2012）与最晚的一年（2015，上半年）为两个样本，对每个通过缺失率 / IV 筛选的候选特征按评分卡分箱（含缺失箱）算 CSI，> 0.25 剔除；放在相关性筛选之前，避免不稳定的高 IV 特征挤掉稳定的相关特征。报告 2.3b 列出被剔除的特征和偏移最大的箱；无 issue_date 的数据集跳过并在漏斗里注明。
-- Lending Club：15 个特征被剔除，全部是 Missing 箱的变化——`num_tl_op_past_12m`、`tot_hi_cred_lim` 等 6 个字段 2012 年缺失 51.65%、2015 年 0%（CSI 4.8），`acc_open_past_24mths`、`mort_acc` 等 13.8% → 0%（CSI 1.0），`bc_open_to_buy`、`percent_bc_gt_75` 等 14.9% → 1%（CSI 0.4）。这些字段 2012 年中才开始由征信局提供。
-- 代价（同一 36 期样本、同一配置，只关掉筛选的对照跑，`--no-cv`）：入模 15 个特征，test AUC 0.6656 / KS 0.2378，OOT 0.6743 / 0.2508；开着筛选是 6 个特征，test 0.6473 / 0.2134，OOT 0.6508 / 0.2149。筛选换来第 6 节零漂移、评分卡只用申请时一直有的 6 个变量，代价是约 0.02 AUC（OOT 0.024），而且 OOT 上的 swap set 输给 grade 0.42 pp（第 7 节警告）。
-- 备选（已试跑）：`sample.min_issue_date: "2013-01"` 让这批字段在 train 内全程有值——筛选照常开着也保留 15 个特征，546,018 笔，test AUC 0.6624 / KS 0.2319，OOT 0.6737 / 0.2491。这是我建议的口径，但它改变了 PLAN 的 2012-01 起点，留给用户决定；本次提交按用户原话执行（2012-01 起、阈值 0.25）。
-- 代码：`scorecard/select.py` → `time_stability_table`；报告 2.3 漏斗与 2.3b。
+### D26 select 新增时间稳定性筛选（`select.max_time_csi` = 0.25）；定案：样本起点改为 2013-01，筛选保持开启
+- 做法：train 内取 issue 年最早的一年与最晚的一年为两个样本，对每个通过缺失率 / IV 筛选的候选特征按评分卡分箱（含缺失箱）算 CSI，> 0.25 剔除；放在相关性筛选之前，避免不稳定的高 IV 特征挤掉稳定的相关特征。报告 2.3b 列出被剔除的特征和偏移最大的箱；无 issue_date 的数据集跳过并在漏斗里注明。
+- 2012-01 起点的对照（已跑，不采用）：筛选剔除 15 个征信字段，全部是 Missing 箱的变化——`num_tl_op_past_12m`、`tot_hi_cred_lim` 等 6 个字段 2012 年缺失 51.65%、2015 年 0%（CSI 4.8），`acc_open_past_24mths`、`mort_acc` 等 13.8% → 0%（CSI 1.0）；评分卡只剩 6 个变量，test AUC 0.6473 / KS 0.2134，OOT 0.6508 / 0.2149，OOT 上 swap set 输给 grade 0.42 pp。同一样本关掉筛选：15 个变量，test 0.6656 / 0.2378，OOT 0.6743 / 0.2508——筛选在 2012 起点上的代价约 0.02 AUC。
+- 定案（用户）：`sample.min_issue_date` 改为 "2013-01"，筛选保持开启。理由：主要征信字段（num_*、mo_sin_*、tot_*、bc_* 等）自 2012 年中起才由征信局提供，起点取在字段可得性稳定之后，筛选就只会剔除真正随时间漂移的特征，而不是"刚开始有值"的特征；2007–2012 另有量小、产品与客群不同的问题。样本定义表第 6 条按此措辞（adapter 文案）。
+- 定案后的数字见 README / FAQ：2013-01 起点 + 筛选开启 = 546,018 笔，15 个变量，test AUC 0.6624 / KS 0.2319，OOT 0.6737 / 0.2491——与关掉筛选的 2012 起点相当，而第 6 节不再有缺失箱造成的 CSI 报警。
+- 顺带：报告 1.3 表在单一期限的卡下删掉"60 期占比"列（全 0），表名改为"min_issue_date 之前：bad rate 按 issue 年"。
+- 代码：`scorecard/select.py` → `time_stability_table`；报告 2.3 漏斗与 2.3b；`configs/lendingclub.yaml`。
 
 ### D27 约束下的最优 cut-off 作为第 5 节主要结论；利润曲线退为参照
 - 新增 `strategy.max_bad_rate`（默认 0.10）与 `strategy.target_approval_rate`（默认 0.70，取代 Phase 2 的 `swap_set_approval_rate`；swap set 也按这档展示）。5.3 表：(a) 通过客群 bad rate ≤ 上限时通过率最高的 cut-off；(b) 目标通过率下的坏账率与净现金。报告头部也显示 (a)。

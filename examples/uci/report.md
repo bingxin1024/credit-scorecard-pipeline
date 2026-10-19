@@ -2,8 +2,8 @@
 
 - **数据**：data/raw/uci_default_of_credit_card_clients.csv（30,000 行）
 - **config hash**：f0649da10817
-- **git commit**：ab257db
-- **生成时间**：2026-10-19 02:51:23
+- **git commit**：b951183
+- **生成时间**：2026-10-19 13:02:10
 
 - **样本**：30,000 笔，bad rate 22.12%
 - **入模特征**：17 / 32
@@ -877,9 +877,9 @@ _对 leakage、单箱占比、train–test KS 差、PSI / CSI、高缺失率入�
 
 - **config**：configs\uci.yaml（hash f0649da10817）
 - **数据文件**：data/raw/uci_default_of_credit_card_clients.csv；原始 30,000 行 → 样本 30,000 行
-- **git commit**：ab257db
-- **运行时间**：2026-10-19 02:51:23
-- **总耗时**：2.9 s
+- **git commit**：b951183
+- **运行时间**：2026-10-19 13:02:10
+- **总耗时**：5.0 s
 - **版本**：python 3.13.2, credit-scorecard-pipeline 0.1.0, pandas 3.0.6, numpy 2.5.4, sklearn 1.9.1, toad 0.1.7, matplotlib 3.11.2
 - **缓存**：未命中 / 未启用
 
@@ -887,20 +887,20 @@ _对 leakage、单箱占比、train–test KS 差、PSI / CSI、高缺失率入�
 
 | 步骤 | 秒 |
 |---|---|
-| load | 0.2 |
+| load | 0.4 |
 | split | 0.0 |
 | profile | 0.1 |
-| variants | 2.4 |
+| variants | 4.2 |
 | strategy | 0.1 |
 | monitor | 0.1 |
 | checks | 0.0 |
-| artifacts | 0.0 |
-| variant.no_platform_rating.binning | 0.2 |
-| variant.no_platform_rating.select_and_lr | 0.2 |
-| variant.no_platform_rating.gbdt | 0.2 |
-| variant.no_platform_rating.scoring | 0.2 |
-| variant.no_platform_rating.cv_lr | 0.6 |
-| variant.no_platform_rating.cv_gbdt | 1.0 |
+| artifacts | 0.1 |
+| variant.no_platform_rating.binning | 0.3 |
+| variant.no_platform_rating.select_and_lr | 0.3 |
+| variant.no_platform_rating.gbdt | 0.6 |
+| variant.no_platform_rating.scoring | 0.3 |
+| variant.no_platform_rating.cv_lr | 0.9 |
+| variant.no_platform_rating.cv_gbdt | 1.7 |
 
 <details><summary>完整 config</summary>
 
